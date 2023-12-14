@@ -8,6 +8,7 @@ Parameters:
   Env:
     Description: stack environment
     Type: String
+    Default: dev
   providerURL:
     Type: String
     Default: https://oidc.eks.us-east-2.amazonaws.com/id/8D68C5A86EBBDC04DD570CF1DAFB76BE
@@ -57,7 +58,7 @@ Resources:
   OIDCRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: OIDCRoleGoAccount
+      RoleName: OIDCRoleGoCredit
       AssumeRolePolicyDocument:
         Fn::Sub:
         - "{\n  \"Version\": \"2012-10-17\",\n  \"Statement\": [\n    {\n      \"\
@@ -80,7 +81,7 @@ Resources:
               - //
               - Ref: providerURL
       Policies:
-      - PolicyName: GoAccountClusterPolicy
+      - PolicyName: OIDCRoleGoCreditClusterPolicy
         PolicyDocument:
           Version: '2012-10-17'
           Statement:
