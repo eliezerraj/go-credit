@@ -1,7 +1,7 @@
 # AWS_DEFAULT_REGION us-east-2
 # AWS_ACCOUNT_ID 908671954593
 # IMAGE_TAG latest
-# IMAGE_REPO_NAME go-account
+# IMAGE_REPO_NAME go-credit
 
 version: 0.2
 phases: 
