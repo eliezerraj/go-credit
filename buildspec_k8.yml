@@ -1,3 +1,7 @@
+#AWS_DEFAULT_REGION us-east-2
+#EKS_CLUSTER_NAME arch-eks
+#EKS_KUBECTL_ROLE_ARN arn:aws:iam::908671954593:role/CodeBuildKubectlRole
+
 version: 0.2 
 phases: 
   install: 
