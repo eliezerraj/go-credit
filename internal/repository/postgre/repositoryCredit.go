@@ -16,7 +16,7 @@ import (
 func (w WorkerRepository) Add(ctx context.Context, tx *sql.Tx ,credit core.AccountStatement) (*core.AccountStatement, error){
 	childLogger.Debug().Msg("Add")
 
-	_, root := xray.BeginSubsegment(ctx, "SQL.Add-Credit")
+	_, root := xray.BeginSubsegment(ctx, "Repository.Add.Credit")
 	defer func() {
 		root.Close(nil)
 	}()
@@ -52,7 +52,7 @@ func (w WorkerRepository) Add(ctx context.Context, tx *sql.Tx ,credit core.Accou
 func (w WorkerRepository) List(ctx context.Context, credit core.AccountStatement) (*[]core.AccountStatement, error){
 	childLogger.Debug().Msg("List")
 
-	_, root := xray.BeginSubsegment(ctx, "SQL.List-Credit")
+	_, root := xray.BeginSubsegment(ctx, "Repository.List.Credit")
 	defer func() {
 		root.Close(nil)
 	}()
