@@ -4,6 +4,10 @@ POC for test purposes.
 
 CRUD a account_statement data.
 
+## Diagram
+
+go-credit (post:add/fund) == (REST) ==> go-account (service.AddFundBalanceAccount) 
+
 ## database
 
     CREATE TABLE account_statement (
