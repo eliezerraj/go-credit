@@ -16,4 +16,6 @@ data:
   DB_DRIVER: "postgres"
   NO_AZ: "true"
   #SERVER_URL_DOMAIN: "http://svc-go-account.test-a.svc.cluster.local:5000"
-  SERVER_URL_DOMAIN: "https://go-account.architecture.caradhras.io"
+  #SERVER_URL_DOMAIN: "https://go-account.architecture.caradhras.io"
+  SERVER_URL_DOMAIN: "https://vpce.global.dev.caradhras.io/pv"
+  X_APIGW_API_ID: "129t4y8eoj"

@@ -68,7 +68,7 @@ func (s WorkerService) Add(ctx context.Context, credit core.AccountStatement) (*
 		return nil, erro.ErrInvalidAmount
 	}
 
-	rest_interface_data, err := s.restapi.GetData(ctx, credit.AccountID, "/get")
+	rest_interface_data, err := s.restapi.GetData(ctx, s.restapi.ServerUrlDomain, s.restapi.XApigwId, "/get", credit.AccountID)
 	if err != nil {
 		return nil, err
 	}
@@ -88,7 +88,7 @@ func (s WorkerService) Add(ctx context.Context, credit core.AccountStatement) (*
 
 	childLogger.Debug().Interface("credit:",credit).Msg("")
 
-	_, err = s.restapi.PostData(ctx, "/add/fund", credit)
+	_, err = s.restapi.PostData(ctx, s.restapi.ServerUrlDomain, s.restapi.XApigwId, "/add/fund", credit)
 	if err != nil {
 		return nil, err
 	}
@@ -103,7 +103,7 @@ func (s WorkerService) List(ctx context.Context, credit core.AccountStatement) (
 	_, root := xray.BeginSubsegment(ctx, "Service.List")
 	defer root.Close(nil)
 
-	rest_interface_data, err := s.restapi.GetData(ctx, credit.AccountID, "/get")
+	rest_interface_data, err := s.restapi.GetData(ctx, s.restapi.ServerUrlDomain, s.restapi.XApigwId, "/get", credit.AccountID)
 	if err != nil {
 		return nil, err
 	}
