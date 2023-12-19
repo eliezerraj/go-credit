@@ -69,7 +69,7 @@ func (s WorkerService) Add(ctx context.Context, credit core.AccountStatement) (*
 
 	// Mock Circuit Breaker
 	_, err = s.circuitBreaker.Execute(func() (interface{}, error) {
-		if credit.Type != "CREDIT" {
+		if credit.Type == "CREDITX" {
 			return nil, erro.ErrInvalid
 		}
 		return nil , nil
