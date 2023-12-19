@@ -12,6 +12,7 @@ import(
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 
+	"github.com/go-credit/internal/circuitbreaker"
 	"github.com/aws/aws-sdk-go-v2/feature/ec2/imds"
     "github.com/aws/aws-sdk-go-v2/config"
 
@@ -178,13 +179,13 @@ func main() {
 	}
 	
 	// Setup workload
-
+	circuitBreaker := circuitbreaker.CircuitBreakerConfig()
 	restapi	:= restapi.NewRestApi(serverUrlDomain, xApigwId)
 
 	httpAppServerConfig.Server = server
 	repoDB = postgre.NewWorkerRepository(dataBaseHelper)
 
-	workerService := service.NewWorkerService(&repoDB, restapi)
+	workerService := service.NewWorkerService(&repoDB, restapi, circuitBreaker)
 	httpWorkerAdapter := handler.NewHttpWorkerAdapter(workerService)
 
 	httpAppServerConfig.InfoPod = &infoPod

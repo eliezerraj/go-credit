@@ -5,6 +5,7 @@ import (
 	"errors"
 	"github.com/rs/zerolog/log"
 
+	"github.com/sony/gobreaker"
 	"github.com/mitchellh/mapstructure"
 	"github.com/go-credit/internal/core"
 	"github.com/go-credit/internal/erro"
@@ -19,15 +20,18 @@ var childLogger = log.With().Str("service", "service").Logger()
 type WorkerService struct {
 	workerRepository 		*postgre.WorkerRepository
 	restapi					*restapi.RestApiSConfig
+	circuitBreaker			*gobreaker.CircuitBreaker
 }
 
 func NewWorkerService(	workerRepository 	*postgre.WorkerRepository,
-						restapi				*restapi.RestApiSConfig) *WorkerService{
+						restapi				*restapi.RestApiSConfig,
+						circuitBreaker	*gobreaker.CircuitBreaker) *WorkerService{
 	childLogger.Debug().Msg("NewWorkerService")
 
 	return &WorkerService{
 		workerRepository:	workerRepository,
 		restapi:			restapi,
+		circuitBreaker: 	circuitBreaker,
 	}
 }
 
@@ -62,6 +66,41 @@ func (s WorkerService) Add(ctx context.Context, credit core.AccountStatement) (*
 	}()
 
 	childLogger.Debug().Interface("credit:",credit).Msg("")
+
+	// Mock Circuit Breaker
+	_, err = s.circuitBreaker.Execute(func() (interface{}, error) {
+		if credit.Type != "CREDIT" {
+			return nil, erro.ErrInvalid
+		}
+		return nil , nil
+	})
+
+	if (err != nil) {
+		_, segCB := xray.BeginSubsegment(ctx, "Service.CIRCUIT-BREAKER")
+
+		childLogger.Debug().Msg("--------------------------------------------------")
+		childLogger.Error().Err(err).Msg(" ****** Circuit Breaker OPEN !!! ******")
+		childLogger.Debug().Msg("--------------------------------------------------")
+
+		serverUrlDomainCB := "https://go-fund-transfer.architecture.caradhras.io"
+		xApigwIdCP := ""
+
+		transfer := core.Transfer{}
+		transfer.Currency = credit.Currency
+		transfer.Amount = credit.Amount
+		transfer.AccountIDTo = credit.AccountID
+
+		_, err = s.restapi.PostData(ctx, serverUrlDomainCB, xApigwIdCP, "/creditFundSchedule", transfer)
+		if err != nil {
+			return nil, err
+		}
+
+		credit.Obs =  "Transação enviada via Circuit Breaker !!!!"
+		
+		segCB.Close(nil)
+		return &credit, nil
+	}
+	// Mock Circuit Breaker
 
 	credit.Type = "CREDIT"
 	if credit.Amount < 0 {

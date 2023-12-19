@@ -45,6 +45,8 @@ func (w WorkerRepository) Add(ctx context.Context, tx *sql.Tx ,credit core.Accou
 		return nil, errors.New(err.Error())
 	}
 
+	credit.ChargeAt = time.Now()
+
 	defer stmt.Close()
 	return &credit , nil
 }
