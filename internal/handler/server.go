@@ -67,7 +67,6 @@ func (h HttpServer) StartHttpAppServer(ctx context.Context, httpWorkerAdapter *H
 
 	header := myRouter.Methods(http.MethodGet, http.MethodOptions).Subrouter()
     header.HandleFunc("/header", httpWorkerAdapter.Header)
-	header.Use(MiddleWareHandlerHeader)
 
 	addCredit := myRouter.Methods(http.MethodPost, http.MethodOptions).Subrouter()
 	addCredit.Handle("/add", 
@@ -83,7 +82,6 @@ func (h HttpServer) StartHttpAppServer(ctx context.Context, httpWorkerAdapter *H
 						http.HandlerFunc(httpWorkerAdapter.List),
 						),
 	)
-	listCredit.Use(MiddleWareHandlerHeader)
 	
 	srv := http.Server{
 		Addr:         ":" +  strconv.Itoa(h.httpAppServer.Server.Port),      	

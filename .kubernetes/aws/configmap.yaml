@@ -19,3 +19,4 @@ data:
   #SERVER_URL_DOMAIN: "https://go-account.architecture.caradhras.io"
   SERVER_URL_DOMAIN: "https://vpce.global.dev.caradhras.io/pv"
   X_APIGW_API_ID: "129t4y8eoj"
+  TLS: "true"

@@ -14,6 +14,7 @@ type DatabaseRDS struct {
 type HttpAppServer struct {
 	InfoPod 	*InfoPod 		`json:"info_pod"`
 	Server     	Server     		`json:"server"`
+	Cert		*Cert			`json:"cert"`
 }
 
 type InfoPod struct {

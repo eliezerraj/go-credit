@@ -24,8 +24,8 @@ func MiddleWareHandlerHeader(next http.Handler) http.Handler {
 			childLogger.Debug().Str("Headers : ", string(reqHeadersBytes) ).Msg("")
 		}
 
-		childLogger.Debug().Str("Method : ", r.Method ).Msg("")
-		childLogger.Debug().Str("URL : ", r.URL.Path ).Msg("")*/
+		childLogger.Debug().Str("Method : ", r.Method ).Msg("")*/
+		childLogger.Debug().Str("URL : ", r.URL.Path ).Msg("")
 
 		w.Header().Set("Content-Type", "application/json")
 		w.Header().Set("Access-Control-Allow-Origin", "*")

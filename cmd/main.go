@@ -11,6 +11,7 @@ import(
 	"github.com/joho/godotenv"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
+	"encoding/base64"
 
 	"github.com/go-credit/internal/circuitbreaker"
 	"github.com/aws/aws-sdk-go-v2/feature/ec2/imds"
@@ -27,6 +28,7 @@ import(
 var(
 	logLevel 	= 	zerolog.DebugLevel
 	noAZ		=	true // set only if you get to split the xray trace per AZ
+	isTLS		= 	false
 	serverUrlDomain, xApigwId 		string
 	infoPod					core.InfoPod
 	envDB	 				core.DatabaseRDS
@@ -34,6 +36,9 @@ var(
 	server					core.Server
 	dataBaseHelper 			postgre.DatabaseHelper
 	repoDB					postgre.WorkerRepository
+
+	certs					core.Cert
+	caPEM, caPrivKeyPEM		[]byte
 )
 
 func init(){
@@ -67,6 +72,18 @@ func init(){
 	envDB.Password = string(file_pass)
 	envDB.Db_timeout = 90
 
+	// ---- TLS
+	if (isTLS) {
+	caPEM, err = ioutil.ReadFile("/var/pod/cert/ca.crt")
+		if err != nil {
+			log.Info().Err(err).Msg("Cert caPEM nao encontrado")
+		} else {
+			certs.CaPEM, err = base64.StdEncoding.DecodeString(string(caPEM))
+			if err != nil {
+				panic(err)
+			}
+		}
+	}
 	// Load info pod
 	// Get IP
 	addrs, err := net.InterfaceAddrs()
@@ -141,6 +158,10 @@ func getEnv() {
 		xApigwId = os.Getenv("X_APIGW_API_ID")
 	}
 
+	if os.Getenv("TLS") !=  "false" {	
+		isTLS = true
+	}
+
 	if os.Getenv("NO_AZ") == "false" {	
 		noAZ = false
 	} else {
@@ -180,9 +201,10 @@ func main() {
 	
 	// Setup workload
 	circuitBreaker := circuitbreaker.CircuitBreakerConfig()
-	restapi	:= restapi.NewRestApi(serverUrlDomain, xApigwId)
+	restapi	:= restapi.NewRestApi(serverUrlDomain, xApigwId, &certs)
 
 	httpAppServerConfig.Server = server
+	httpAppServerConfig.Cert = &certs
 	repoDB = postgre.NewWorkerRepository(dataBaseHelper)
 
 	workerService := service.NewWorkerService(&repoDB, restapi, circuitBreaker)

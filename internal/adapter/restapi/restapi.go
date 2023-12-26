@@ -7,9 +7,13 @@ import(
 	"encoding/json"
 	"bytes"
 	"context"
+	"crypto/x509"
+	"crypto/tls"
+	"fmt"
 
 	"github.com/rs/zerolog/log"
 	"github.com/go-credit/internal/erro"
+	"github.com/go-credit/internal/core"
 	"github.com/aws/aws-xray-sdk-go/xray"
 )
 
@@ -18,13 +22,26 @@ var childLogger = log.With().Str("adapter/restapi", "restapi").Logger()
 type RestApiSConfig struct {
 	ServerUrlDomain			string
 	XApigwId				string
+	ClientTLSConf 			*tls.Config
 }
 
-func NewRestApi(serverUrlDomain string, xApigwId string) (*RestApiSConfig){
+func NewRestApi(serverUrlDomain string, 
+				xApigwId string,
+				cert	*core.Cert) (*RestApiSConfig){
 	childLogger.Debug().Msg("*** NewRestApi")
+
+	fmt.Println(string(cert.CaPEM))
+
+	certpool := x509.NewCertPool()
+	certpool.AppendCertsFromPEM(cert.CaPEM)
+	clientTLSConf := &tls.Config{
+		RootCAs: certpool,
+	}
+
 	return &RestApiSConfig {
 		ServerUrlDomain: 	serverUrlDomain,
 		XApigwId: 			xApigwId,
+		ClientTLSConf:		clientTLSConf,
 	}
 }
 
@@ -33,7 +50,7 @@ func (r *RestApiSConfig) GetData(ctx context.Context, serverUrlDomain string, xA
 
 	domain := serverUrlDomain + path +"/" + id
 
-	data_interface, err := makeGet(ctx, domain, xApigwId ,id)
+	data_interface, err := r.makeGet(ctx, domain, xApigwId ,id)
 	if err != nil {
 		childLogger.Error().Err(err).Msg("error Request")
 		return nil, errors.New(err.Error())
@@ -47,7 +64,7 @@ func (r *RestApiSConfig) PostData(ctx context.Context, serverUrlDomain string, x
 
 	domain := serverUrlDomain + path 
 
-	data_interface, err := makePost(ctx, domain, xApigwId ,data)
+	data_interface, err := r.makePost(ctx, domain, xApigwId ,data)
 	if err != nil {
 		childLogger.Error().Err(err).Msg("error Request")
 		return nil, errors.New(err.Error())
@@ -56,9 +73,14 @@ func (r *RestApiSConfig) PostData(ctx context.Context, serverUrlDomain string, x
 	return data_interface, nil
 }
 
-func makeGet(ctx context.Context, url string, xApigwId string ,id interface{}) (interface{}, error) {
+func (r *RestApiSConfig) makeGet(ctx context.Context, url string, xApigwId string ,id interface{}) (interface{}, error) {
 	childLogger.Debug().Msg("makeGet")
-	client := xray.Client(&http.Client{Timeout: time.Second * 29})
+
+	transport := &http.Transport{
+		TLSClientConfig: r.ClientTLSConf,
+	}
+
+	client := xray.Client(&http.Client{Timeout: time.Second * 5 , Transport: transport})
 	
 	childLogger.Debug().Str("url : ", url).Msg("")
 	childLogger.Debug().Str("xApigwId : ", xApigwId).Msg("")
@@ -103,9 +125,14 @@ func makeGet(ctx context.Context, url string, xApigwId string ,id interface{}) (
 	return result, nil
 }
 
-func makePost(ctx context.Context, url string, xApigwId string ,data interface{}) (interface{}, error) {
+func (r *RestApiSConfig) makePost(ctx context.Context, url string, xApigwId string ,data interface{}) (interface{}, error) {
 	childLogger.Debug().Msg("makePost")
-	client := xray.Client(&http.Client{Timeout: time.Second * 29})
+
+	transport := &http.Transport{
+		TLSClientConfig: r.ClientTLSConf,
+	}
+
+	client := xray.Client(&http.Client{Timeout: time.Second * 5, Transport: transport})
 	
 	childLogger.Debug().Str("url : ", url).Msg("")
 	childLogger.Debug().Str("xApigwId : ", xApigwId).Msg("")
