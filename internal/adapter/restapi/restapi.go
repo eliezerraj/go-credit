@@ -75,15 +75,14 @@ func (r *RestApiSConfig) PostData(ctx context.Context, serverUrlDomain string, x
 
 func (r *RestApiSConfig) makeGet(ctx context.Context, url string, xApigwId string ,id interface{}) (interface{}, error) {
 	childLogger.Debug().Msg("makeGet")
-
-	transport := &http.Transport{
-		TLSClientConfig: r.ClientTLSConf,
-	}
-
-	client := xray.Client(&http.Client{Timeout: time.Second * 5 , Transport: transport})
-	
 	childLogger.Debug().Str("url : ", url).Msg("")
 	childLogger.Debug().Str("xApigwId : ", xApigwId).Msg("")
+
+	/*transport := &http.Transport{
+		TLSClientConfig: r.ClientTLSConf,
+	}
+	client := xray.Client(&http.Client{Timeout: time.Second * 5 , Transport: transport})*/
+	client := xray.Client(&http.Client{Timeout: time.Second * 5})
 
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
@@ -127,16 +126,15 @@ func (r *RestApiSConfig) makeGet(ctx context.Context, url string, xApigwId strin
 
 func (r *RestApiSConfig) makePost(ctx context.Context, url string, xApigwId string ,data interface{}) (interface{}, error) {
 	childLogger.Debug().Msg("makePost")
-
-	transport := &http.Transport{
-		TLSClientConfig: r.ClientTLSConf,
-	}
-
-	client := xray.Client(&http.Client{Timeout: time.Second * 5, Transport: transport})
-	
 	childLogger.Debug().Str("url : ", url).Msg("")
 	childLogger.Debug().Str("xApigwId : ", xApigwId).Msg("")
 
+	/*transport := &http.Transport{
+		TLSClientConfig: r.ClientTLSConf,
+	})
+	client := xray.Client(&http.Client{Timeout: time.Second * 5, Transport: transport})*/
+
+	client := xray.Client(&http.Client{Timeout: time.Second * 5})
 	payload := new(bytes.Buffer)
 	json.NewEncoder(payload).Encode(data)
 
