@@ -155,6 +155,8 @@ func (s WorkerService) List(ctx context.Context, credit core.AccountStatement) (
     }
 
 	credit.FkAccountID = account_parsed.ID
+	credit.Type = "CREDIT"
+
 	res, err := s.workerRepository.List(ctx, credit)
 	if err != nil {
 		return nil, err
