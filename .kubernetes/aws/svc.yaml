@@ -4,7 +4,7 @@ metadata:
   name: &app-name svc-go-credit
   namespace: test-a
   labels:
-    app: *app-name
+    app: go-credit
 spec:
   type: ClusterIP
   ports:

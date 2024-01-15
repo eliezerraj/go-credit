@@ -111,7 +111,6 @@ func (s WorkerService) Add(ctx context.Context, credit core.AccountStatement) (*
 	if err != nil {
 		return nil, err
 	}
-
 	var account_parsed core.Account
 	err = mapstructure.Decode(rest_interface_data, &account_parsed)
     if err != nil {

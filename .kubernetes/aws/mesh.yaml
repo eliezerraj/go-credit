@@ -1,0 +1,68 @@
+apiVersion: appmesh.k8s.aws/v1beta2
+kind: Mesh
+metadata:
+  name: go-account-mesh
+  namespace: test-a
+spec:
+  namespaceSelector:
+    matchLabels:
+      mesh: go-account-mesh
+  egressFilter:
+    type: ALLOW_ALL
+---
+apiVersion: appmesh.k8s.aws/v1beta2
+kind: VirtualNode
+metadata:
+  name: svc-go-credit
+  namespace: test-a
+spec:
+  podSelector:
+    matchLabels:
+      app: go-credit
+  listeners:
+    - portMapping:
+        port: 5001
+        protocol: http
+      healthCheck:
+        protocol: http
+        path: '/health'
+        healthyThreshold: 5
+        unhealthyThreshold: 5
+        timeoutMillis: 2000
+        intervalMillis: 5000
+  serviceDiscovery:
+    dns:
+      hostname: svc-go-credit.test-a.svc.cluster.local
+---
+apiVersion: appmesh.k8s.aws/v1beta2
+kind: VirtualRouter
+metadata:
+  namespace: test-a
+  name: go-credit-virtual-router
+spec:
+  listeners:
+    - portMapping:
+        port: 5001
+        protocol: http
+  routes:
+    - name: go-credit-svc-mesh-route
+      httpRoute:
+        match:
+          prefix: /
+        action:
+          weightedTargets:
+            - virtualNodeRef:
+                name: svc-go-credit
+              weight: 1
+---
+apiVersion: appmesh.k8s.aws/v1beta2
+kind: VirtualService
+metadata:
+  name: svc-go-credit
+  namespace: test-a
+spec:
+  awsName: svc-go-credit.test-a.svc.cluster.local
+  provider:
+    virtualRouter:
+      virtualRouterRef:
+        name: go-credit-virtual-router

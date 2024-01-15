@@ -1,0 +1,7 @@
+kind: Namespace
+apiVersion: v1
+metadata:
+  name: test-a
+  labels:
+    kmesh: go-account-mesh
+    appmesh.k8s.aws/sidecarInjectorWebhook: enabled
