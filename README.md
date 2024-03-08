@@ -34,6 +34,8 @@ go-credit (post:add/fund) == (REST) ==> go-account (service.AddFundBalanceAccoun
 
 + GET /header
 
++ GET /info
+
 + GET /list/ACC-1
 
         curl svc01.domain.com/list/ACC-1 | jq
