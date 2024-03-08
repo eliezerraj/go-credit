@@ -104,7 +104,8 @@ func (s WorkerService) Add(ctx context.Context, credit core.AccountStatement) (*
 
 	credit.Type = "CREDIT"
 	if credit.Amount < 0 {
-		return nil, erro.ErrInvalidAmount
+		err = erro.ErrInvalidAmount
+		return nil, err
 	}
 
 	rest_interface_data, err := s.restapi.GetData(ctx, s.restapi.ServerUrlDomain, s.restapi.XApigwId, "/get", credit.AccountID)

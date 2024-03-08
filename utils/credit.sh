@@ -13,19 +13,23 @@ genAmount(){
 }
 
 # --------------------Load n per 1-------------------------
-domain=http://localhost:5001/add
+
+#domain=http://localhost:5001/add
+domain=https://go-api-global.architecture.caradhras.io/credit/add
+
+TOKEN=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwic2NvcGUiOlsiYWRtaW4iXSwiZXhwIjoxNzA4MDQ2MDg2fQ.s2997s5lHtxDAfOFYZCmPOxmKmkrlDCARcMnbndfR3s
 
 min=1
-max=10
+max=1000
 
-max_amount=500
-min_amount=300
+max_amount=6500
+min_amount=540
 
-for (( x=0; x<=10; x++ ))
+for (( x=0; x<=1000; x++ ))
 do
     genAcc
     genAmount
-    echo curl -X POST $domain -H 'Content-Type: application/json' -d '{"account_id": "ACC-'$var_acc'","type_charge": "CREDIT","amount":'$var_amount',"tenant_id": "TENANT-1"}'
-    curl -X POST $domain -H 'Content-Type: application/json' -d '{"account_id": "ACC-'$var_acc'","type_charge": "CREDIT","amount":'$var_amount',"tenant_id": "TENANT-1"}'
+    echo    curl -X POST $domain -H 'Content-Type: application/json' -H "Authorization: $TOKEN" -d '{"account_id": "ACC-'$var_acc'","type_charge": "CREDIT","amount":'$var_amount',"tenant_id": "TENANT-1"}'
+            curl -X POST $domain -H 'Content-Type: application/json' -H "Authorization: $TOKEN" -d '{"account_id": "ACC-'$var_acc'","type_charge": "CREDIT","amount":'$var_amount',"tenant_id": "TENANT-1"}'
 done
 
