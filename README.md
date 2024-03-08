@@ -1,8 +1,8 @@
 # go-credit
 
-POC for test purposes.
+POC for test purposes
 
-CRUD a account_statement data.
+CRUD a account_statement data
 
 ## Diagram
 
