@@ -113,8 +113,12 @@ func (h *HttpWorkerAdapter) Add( rw http.ResponseWriter, req *http.Request) {
 				rw.WriteHeader(404)
 				json.NewEncoder(rw).Encode(err.Error())
 				return
-			default:
+			case erro.ErrTransInvalid:
 				rw.WriteHeader(409)
+				json.NewEncoder(rw).Encode(err.Error())
+				return
+			default:
+				rw.WriteHeader(500)
 				json.NewEncoder(rw).Encode(err.Error())
 				return
 		}

@@ -48,6 +48,7 @@ func (s WorkerService) SetSessionVariable(ctx context.Context, userCredential st
 
 func (s WorkerService) Add(ctx context.Context, credit core.AccountStatement) (*core.AccountStatement, error){
 	childLogger.Debug().Msg("Add")
+	childLogger.Debug().Interface("credit:",credit).Msg("")
 
 	_, root := xray.BeginSubsegment(ctx, "Service.Add")
 
@@ -65,12 +66,10 @@ func (s WorkerService) Add(ctx context.Context, credit core.AccountStatement) (*
 		root.Close(nil)
 	}()
 
-	childLogger.Debug().Interface("credit:",credit).Msg("")
-
-	// Mock Circuit Breaker
+	// BEGIN ------- Mock Circuit Breaker
 	_, err = s.circuitBreaker.Execute(func() (interface{}, error) {
 		if credit.Type == "CREDITX" {
-			return nil, erro.ErrInvalid
+			return nil, erro.ErrTransInvalid
 		}
 		return nil , nil
 	})
@@ -100,9 +99,13 @@ func (s WorkerService) Add(ctx context.Context, credit core.AccountStatement) (*
 		segCB.Close(nil)
 		return &credit, nil
 	}
-	// Mock Circuit Breaker
+	// END --------- Mock Circuit Breaker
 
-	credit.Type = "CREDIT"
+	if credit.Type != "CREDIT" {
+		err = erro.ErrTransInvalid
+		return nil, err
+	}
+
 	if credit.Amount < 0 {
 		err = erro.ErrInvalidAmount
 		return nil, err

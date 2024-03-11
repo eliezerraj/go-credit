@@ -15,5 +15,6 @@ var (
 	ErrServer		 	= errors.New("Erro não identificado")
 	ErrHTTPForbiden		= errors.New("Requisição recusada")
 	ErrInvalid			= errors.New("Dado inválido")
+	ErrTransInvalid		= errors.New("Transação inválida")
 	ErrInvalidAmount	= errors.New("Valor inválido para esse tipo de transaçao")
 )
