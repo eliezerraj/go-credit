@@ -17,4 +17,4 @@ data:
   NO_AZ: "true"
   SERVER_URL_DOMAIN: https://svc-go-account.test-a.svc.cluster.local:5000
   X_APIGW_API_ID: "129t4y8eoj"
-  TLS: "false"
+  TLS: "true"
