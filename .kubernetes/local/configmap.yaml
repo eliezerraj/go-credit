@@ -7,14 +7,17 @@ metadata:
     app: *app-name
 data:
   API_VERSION: "1.0"
-  POD_NAME: "go-credit"
+  POD_NAME: "go-credit.k8"
   PORT: "5001"
   DB_HOST: "host.docker.internal"
   DB_PORT: "5432"
   DB_NAME: "postgres"
   DB_SCHEMA: "public"
   DB_DRIVER: "postgres"
-  NO_AZ: "true"
-  SERVER_URL_DOMAIN: https://svc-go-account.test-a.svc.cluster.local:5000 # call inside the cluster
-  X_APIGW_API_ID: "129t4y8eoj"
   TLS: "false"
+  SETPOD_AZ: "false"
+
+  SERVICE_URL_DOMAIN: https://svc-go-account.test-a.svc.cluster.local:5000 # call inside the cluster
+  X_APIGW_API_ID: "129t4y8eoj"
+  SERVICE_URL_DOMAIN_CB: https://go-fund-transfer.architecture.caradhras.io
+  X_APIGW_API_ID_CB: ""

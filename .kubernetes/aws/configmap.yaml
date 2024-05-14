@@ -6,17 +6,21 @@ metadata:
   labels:
     app: *app-name
 data:
-  API_VERSION: "1.1"
-  POD_NAME: "go-credit"
+  API_VERSION: "2.0"
+  POD_NAME: "go-credit.k8"
   PORT: "5001"
   DB_HOST: "rds-proxy-db-arch.proxy-couoacqalfwt.us-east-2.rds.amazonaws.com"
   DB_PORT: "5432"
   DB_NAME: "postgres"
   DB_SCHEMA: "public"
   DB_DRIVER: "postgres"
-  NO_AZ: "true"
-  #SERVER_URL_DOMAIN: "http://svc-go-account.test-a.svc.cluster.local:5000"
-  #SERVER_URL_DOMAIN: "https://go-account.architecture.caradhras.io"
-  SERVER_URL_DOMAIN: "https://vpce.global.dev.caradhras.io/pv"
+  TLS: "false"    
+  SETPOD_AZ: "false"
+ 
+  SERVICE_URL_DOMAIN: "https://vpce.global.dev.caradhras.io/pv" # call inside the cluster
   X_APIGW_API_ID: "129t4y8eoj"
-  TLS: "false"
+  SERVICE_URL_DOMAIN_CB: "https://go-fund-transfer.architecture.caradhras.io"
+  X_APIGW_API_ID_CB: ""
+
+ #SERVER_URL_DOMAIN: "http://svc-go-account.test-a.svc.cluster.local:5000"
+  #SERVER_URL_DOMAIN: "https://go-account.architecture.caradhras.io"

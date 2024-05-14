@@ -19,18 +19,21 @@ var childLogger = log.With().Str("service", "service").Logger()
 
 type WorkerService struct {
 	workerRepository 		*postgre.WorkerRepository
-	restapi					*restapi.RestApiSConfig
+	restEndpoint			*core.RestEndpoint
+	restApiService			*restapi.RestApiService
 	circuitBreaker			*gobreaker.CircuitBreaker
 }
 
 func NewWorkerService(	workerRepository 	*postgre.WorkerRepository,
-						restapi				*restapi.RestApiSConfig,
-						circuitBreaker	*gobreaker.CircuitBreaker) *WorkerService{
+						restEndpoint		*core.RestEndpoint,
+						restApiService		*restapi.RestApiService,
+						circuitBreaker		*gobreaker.CircuitBreaker) *WorkerService{
 	childLogger.Debug().Msg("NewWorkerService")
 
 	return &WorkerService{
 		workerRepository:	workerRepository,
-		restapi:			restapi,
+		restEndpoint:		restEndpoint,
+		restApiService:		restApiService,
 		circuitBreaker: 	circuitBreaker,
 	}
 }
@@ -81,15 +84,16 @@ func (s WorkerService) Add(ctx context.Context, credit core.AccountStatement) (*
 		childLogger.Error().Err(err).Msg(" ****** Circuit Breaker OPEN !!! ******")
 		childLogger.Debug().Msg("--------------------------------------------------")
 
-		serverUrlDomainCB := "https://go-fund-transfer.architecture.caradhras.io"
-		xApigwIdCP := ""
-
 		transfer := core.Transfer{}
 		transfer.Currency = credit.Currency
 		transfer.Amount = credit.Amount
 		transfer.AccountIDTo = credit.AccountID
 
-		_, err = s.restapi.PostData(ctx, serverUrlDomainCB, xApigwIdCP, "/creditFundSchedule", transfer)
+		_, err = s.restApiService.PostData(ctx, 
+									s.restEndpoint.ServiceUrlDomainCB, 
+									s.restEndpoint.XApigwIdCB, 
+									"/creditFundSchedule", 
+									transfer)
 		if err != nil {
 			return nil, err
 		}
@@ -111,7 +115,11 @@ func (s WorkerService) Add(ctx context.Context, credit core.AccountStatement) (*
 		return nil, err
 	}
 
-	rest_interface_data, err := s.restapi.GetData(ctx, s.restapi.ServerUrlDomain, s.restapi.XApigwId, "/get", credit.AccountID)
+	rest_interface_data, err := s.restApiService.GetData(ctx, 
+														s.restEndpoint.ServiceUrlDomain, 
+														s.restEndpoint.XApigwId, 
+														"/get", 
+														credit.AccountID)
 	if err != nil {
 		return nil, err
 	}
@@ -130,7 +138,11 @@ func (s WorkerService) Add(ctx context.Context, credit core.AccountStatement) (*
 
 	childLogger.Debug().Interface("credit:",credit).Msg("")
 
-	_, err = s.restapi.PostData(ctx, s.restapi.ServerUrlDomain, s.restapi.XApigwId, "/add/fund", credit)
+	_, err = s.restApiService.PostData(ctx, 
+										s.restEndpoint.ServiceUrlDomain, 
+										s.restEndpoint.XApigwId, 
+										"/add/fund", 
+										credit)
 	if err != nil {
 		return nil, err
 	}
@@ -145,7 +157,11 @@ func (s WorkerService) List(ctx context.Context, credit core.AccountStatement) (
 	_, root := xray.BeginSubsegment(ctx, "Service.List")
 	defer root.Close(nil)
 
-	rest_interface_data, err := s.restapi.GetData(ctx, s.restapi.ServerUrlDomain, s.restapi.XApigwId, "/get", credit.AccountID)
+	rest_interface_data, err := s.restApiService.GetData(	ctx, 
+															s.restEndpoint.ServiceUrlDomain, 
+															s.restEndpoint.XApigwId,  
+															"/get", 
+															credit.AccountID)
 	if err != nil {
 		return nil, err
 	}

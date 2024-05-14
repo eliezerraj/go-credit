@@ -9,7 +9,8 @@ import(
 	"context"
 	"crypto/x509"
 	"crypto/tls"
-	"fmt"
+	"encoding/base64"
+	//"fmt"
 
 	"github.com/rs/zerolog/log"
 	"github.com/go-credit/internal/erro"
@@ -17,35 +18,60 @@ import(
 	"github.com/aws/aws-xray-sdk-go/xray"
 )
 
-var childLogger = log.With().Str("adapter/restapi", "restapi").Logger()
+var childLogger = log.With().Str("adapter/restapi", "restApiService").Logger()
 
-type RestApiSConfig struct {
-	ServerUrlDomain			string
-	XApigwId				string
-	ClientTLSConf 			*tls.Config
+type RestApiService struct {
+							//ServerUrlDomain	string
+							//XApigwId			string
+							//ClientTLSConf 	*tls.Config
 }
 
-func NewRestApi(serverUrlDomain string, 
-				xApigwId string,
-				cert	*core.Cert) (*RestApiSConfig){
-	childLogger.Debug().Msg("*** NewRestApi")
+func NewRestApiService(
+				//serverUrlDomain string, 
+				//xApigwId string,
+				//cert	*core.Cert,
+				) (*RestApiService){
+	childLogger.Debug().Msg("*** NewRestApiService")
 
-	fmt.Println(string(cert.CaPEM))
+	/*fmt.Println(string(cert.CaPEM))
 
 	certpool := x509.NewCertPool()
 	certpool.AppendCertsFromPEM(cert.CaPEM)
 	clientTLSConf := &tls.Config{
 		RootCAs: certpool,
 	}
-
-	return &RestApiSConfig {
-		ServerUrlDomain: 	serverUrlDomain,
-		XApigwId: 			xApigwId,
-		ClientTLSConf:		clientTLSConf,
+*/
+	return &RestApiService {
+	//	ServerUrlDomain: 	serverUrlDomain,
+	//	XApigwId: 			xApigwId,
+	//	ClientTLSConf:		clientTLSConf,
 	}
 }
 
-func (r *RestApiSConfig) GetData(ctx context.Context, serverUrlDomain string, xApigwId string ,path string , id string ) (interface{}, error) {
+func loadClientCertsTLS(cert *core.Cert) (*tls.Config, error){
+	childLogger.Debug().Msg("loadClientCertsTLS")
+
+	caPEM_Raw, err := base64.StdEncoding.DecodeString(string(cert.CaPEM))
+	if err != nil {
+		childLogger.Error().Err(err).Msg("Erro caPEM_Raw !!!")
+		return nil, err
+	}
+
+	certpool := x509.NewCertPool()
+	certpool.AppendCertsFromPEM(caPEM_Raw)
+
+	clientTLSConf := &tls.Config{
+		RootCAs: certpool,
+	}
+
+	return clientTLSConf ,nil
+}
+
+func (r *RestApiService) GetData(ctx context.Context, 
+								serverUrlDomain string, 
+								xApigwId string,
+								path string, 
+								id string ) (interface{}, error) {
 	childLogger.Debug().Msg("GetData")
 
 	domain := serverUrlDomain + path +"/" + id
@@ -59,7 +85,11 @@ func (r *RestApiSConfig) GetData(ctx context.Context, serverUrlDomain string, xA
 	return data_interface, nil
 }
 
-func (r *RestApiSConfig) PostData(ctx context.Context, serverUrlDomain string, xApigwId string, path string, data interface{}) (interface{}, error) {
+func (r *RestApiService) PostData(	ctx context.Context, 
+									serverUrlDomain string, 
+									xApigwId string, 
+									path string, 
+									data interface{}) (interface{}, error) {
 	childLogger.Debug().Msg("PostData")
 
 	domain := serverUrlDomain + path 
@@ -73,7 +103,10 @@ func (r *RestApiSConfig) PostData(ctx context.Context, serverUrlDomain string, x
 	return data_interface, nil
 }
 
-func (r *RestApiSConfig) makeGet(ctx context.Context, url string, xApigwId string ,id interface{}) (interface{}, error) {
+func (r *RestApiService) makeGet(	ctx context.Context, 
+									url string, 
+									xApigwId string,
+									id interface{}) (interface{}, error) {
 	childLogger.Debug().Msg("makeGet")
 	childLogger.Debug().Str("url : ", url).Msg("")
 	childLogger.Debug().Str("xApigwId : ", xApigwId).Msg("")
@@ -124,7 +157,10 @@ func (r *RestApiSConfig) makeGet(ctx context.Context, url string, xApigwId strin
 	return result, nil
 }
 
-func (r *RestApiSConfig) makePost(ctx context.Context, url string, xApigwId string ,data interface{}) (interface{}, error) {
+func (r *RestApiService) makePost(	ctx context.Context, 
+									url string, 
+									xApigwId string,
+									data interface{}) (interface{}, error) {
 	childLogger.Debug().Msg("makePost")
 	childLogger.Debug().Str("url : ", url).Msg("")
 	childLogger.Debug().Str("xApigwId : ", xApigwId).Msg("")
