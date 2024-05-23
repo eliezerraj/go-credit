@@ -19,35 +19,17 @@ import(
 )
 
 var childLogger = log.With().Str("adapter/restapi", "restApiService").Logger()
-
+//----------------------------------------------
 type RestApiService struct {
-							//ServerUrlDomain	string
-							//XApigwId			string
-							//ClientTLSConf 	*tls.Config
 }
 
-func NewRestApiService(
-				//serverUrlDomain string, 
-				//xApigwId string,
-				//cert	*core.Cert,
-				) (*RestApiService){
+func NewRestApiService(	) *RestApiService{
 	childLogger.Debug().Msg("*** NewRestApiService")
 
-	/*fmt.Println(string(cert.CaPEM))
-
-	certpool := x509.NewCertPool()
-	certpool.AppendCertsFromPEM(cert.CaPEM)
-	clientTLSConf := &tls.Config{
-		RootCAs: certpool,
-	}
-*/
 	return &RestApiService {
-	//	ServerUrlDomain: 	serverUrlDomain,
-	//	XApigwId: 			xApigwId,
-	//	ClientTLSConf:		clientTLSConf,
 	}
 }
-
+//----------------------------------------------
 func loadClientCertsTLS(cert *core.Cert) (*tls.Config, error){
 	childLogger.Debug().Msg("loadClientCertsTLS")
 
