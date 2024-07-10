@@ -5,12 +5,11 @@ import (
 	"errors"
 	"github.com/rs/zerolog/log"
 	
-	"github.com/go-credit/internal/lib"
-
 	"github.com/sony/gobreaker"
 	"github.com/mitchellh/mapstructure"
 	"github.com/go-credit/internal/core"
 	"github.com/go-credit/internal/erro"
+	"github.com/go-credit/internal/lib"
 	"github.com/go-credit/internal/adapter/restapi"
 	"github.com/go-credit/internal/repository/postgre"
 )
@@ -53,7 +52,7 @@ func (s WorkerService) Add(ctx context.Context, credit core.AccountStatement) (*
 	childLogger.Debug().Msg("Add")
 	childLogger.Debug().Interface("credit:",credit).Msg("")
 
-	span := lib.Span(ctx, "service.get")	
+	span := lib.Span(ctx, "service.Add")	
 
 	tx, err := s.workerRepository.StartTx(ctx)
 	if err != nil {
@@ -90,10 +89,10 @@ func (s WorkerService) Add(ctx context.Context, credit core.AccountStatement) (*
 		transfer.Amount = credit.Amount
 		transfer.AccountIDTo = credit.AccountID
 
+		urlDomain := s.restEndpoint.ServiceUrlDomainCB + "/creditFundSchedule"
 		_, err = s.restApiService.PostData(ctx, 
-									s.restEndpoint.ServiceUrlDomainCB, 
+									urlDomain,
 									s.restEndpoint.XApigwIdCB, 
-									"/creditFundSchedule", 
 									transfer)
 		if err != nil {
 			return nil, err
@@ -116,11 +115,8 @@ func (s WorkerService) Add(ctx context.Context, credit core.AccountStatement) (*
 		return nil, err
 	}
 
-	rest_interface_data, err := s.restApiService.GetData(ctx, 
-														s.restEndpoint.ServiceUrlDomain, 
-														s.restEndpoint.XApigwId, 
-														"/get", 
-														credit.AccountID)
+	urlDomain := s.restEndpoint.ServiceUrlDomain + "/get/" + credit.AccountID
+	rest_interface_data, err := s.restApiService.GetData(ctx,urlDomain,s.restEndpoint.XApigwId, credit.AccountID)
 	if err != nil {
 		return nil, err
 	}
@@ -139,10 +135,10 @@ func (s WorkerService) Add(ctx context.Context, credit core.AccountStatement) (*
 
 	childLogger.Debug().Interface("credit:",credit).Msg("")
 
-	_, err = s.restApiService.PostData(ctx, 
-										s.restEndpoint.ServiceUrlDomain, 
+	urlDomain = s.restEndpoint.ServiceUrlDomain + "/add/fund"
+	_, err = s.restApiService.PostData(	ctx, 
+										urlDomain, 
 										s.restEndpoint.XApigwId, 
-										"/add/fund", 
 										credit)
 	if err != nil {
 		return nil, err
@@ -158,10 +154,10 @@ func (s WorkerService) List(ctx context.Context, credit core.AccountStatement) (
 	span := lib.Span(ctx, "service.List")	
     defer span.End()
 
+	urlDomain := s.restEndpoint.ServiceUrlDomain + "/get/" + credit.AccountID
 	rest_interface_data, err := s.restApiService.GetData(	ctx, 
-															s.restEndpoint.ServiceUrlDomain, 
+															urlDomain, 
 															s.restEndpoint.XApigwId,  
-															"/get", 
 															credit.AccountID)
 	if err != nil {
 		return nil, err

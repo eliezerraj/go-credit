@@ -49,15 +49,12 @@ func loadClientCertsTLS(cert *core.Cert) (*tls.Config, error){
 }
 
 func (r *RestApiService) GetData(ctx context.Context, 
-								serverUrlDomain string, 
+								urlDomain string, 
 								xApigwId string,
-								path string, 
-								id string ) (interface{}, error) {
+								data interface{} ) (interface{}, error) {
 	childLogger.Debug().Msg("GetData")
 
-	domain := serverUrlDomain + path +"/" + id
-
-	data_interface, err := r.makeGet(ctx, domain, xApigwId ,id)
+	data_interface, err := r.makeGet(ctx, urlDomain, http.MethodGet, xApigwId, data)
 	if err != nil {
 		childLogger.Error().Err(err).Msg("error Request")
 		return nil, errors.New(err.Error())
@@ -67,15 +64,12 @@ func (r *RestApiService) GetData(ctx context.Context,
 }
 
 func (r *RestApiService) PostData(	ctx context.Context, 
-									serverUrlDomain string, 
+									urlDomain string, 
 									xApigwId string, 
-									path string, 
 									data interface{}) (interface{}, error) {
 	childLogger.Debug().Msg("PostData")
 
-	domain := serverUrlDomain + path 
-
-	data_interface, err := r.makePost(ctx, domain, xApigwId ,data)
+	data_interface, err := r.makePost(ctx, urlDomain, http.MethodPost, xApigwId, data)
 	if err != nil {
 		childLogger.Error().Err(err).Msg("error Request")
 		return nil, errors.New(err.Error())
@@ -86,8 +80,9 @@ func (r *RestApiService) PostData(	ctx context.Context,
 
 func (r *RestApiService) makeGet(	ctx context.Context, 
 									url string, 
+									method string,
 									xApigwId string,
-									id interface{}) (interface{}, error) {
+									data interface{}) (interface{}, error) {
 	childLogger.Debug().Msg("makeGet")
 	childLogger.Debug().Str("url : ", url).Msg("")
 	childLogger.Debug().Str("xApigwId : ", xApigwId).Msg("")
@@ -101,12 +96,11 @@ func (r *RestApiService) makeGet(	ctx context.Context,
     defer span.End()
 
 	client := &http.Client{Timeout: time.Second * 10}
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+	req, err := http.NewRequestWithContext(ctx, method, url, nil)
 	if err != nil {
 		childLogger.Error().Err(err).Msg("error Request")
 		return false, errors.New(err.Error())
 	}
-
 	req.Header.Add("Content-Type", "application/json;charset=UTF-8");
 	req.Header.Add("x-apigw-api-id", xApigwId);
 
@@ -115,6 +109,7 @@ func (r *RestApiService) makeGet(	ctx context.Context,
 		childLogger.Error().Err(err).Msg("error Do Request")
 		return false, errors.New(err.Error())
 	}
+	defer resp.Body.Close()
 
 	childLogger.Debug().Int("StatusCode :", resp.StatusCode).Msg("")
 	switch (resp.StatusCode) {
@@ -131,7 +126,7 @@ func (r *RestApiService) makeGet(	ctx context.Context,
 			return false, erro.ErrServer
 	}
 
-	result := id
+	result := data
 	err = json.NewDecoder(resp.Body).Decode(&result)
     if err != nil {
 		childLogger.Error().Err(err).Msg("error no ErrUnmarshal")
@@ -143,6 +138,7 @@ func (r *RestApiService) makeGet(	ctx context.Context,
 
 func (r *RestApiService) makePost(	ctx context.Context, 
 									url string, 
+									method string,
 									xApigwId string,
 									data interface{}) (interface{}, error) {
 	childLogger.Debug().Msg("makePost")
@@ -161,7 +157,7 @@ func (r *RestApiService) makePost(	ctx context.Context,
 	payload := new(bytes.Buffer)
 	json.NewEncoder(payload).Encode(data)
 
-	req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, payload)
+	req, err := http.NewRequestWithContext(ctx, method, url, payload)
 	if err != nil {
 		childLogger.Error().Err(err).Msg("error Request")
 		return false, errors.New(err.Error())
@@ -175,6 +171,7 @@ func (r *RestApiService) makePost(	ctx context.Context,
 		childLogger.Error().Err(err).Msg("error Do Request")
 		return false, errors.New(err.Error())
 	}
+	defer resp.Body.Close()
 
 	childLogger.Debug().Int("StatusCode :", resp.StatusCode).Msg("")
 	switch (resp.StatusCode) {
