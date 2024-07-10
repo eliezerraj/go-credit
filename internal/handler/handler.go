@@ -140,10 +140,14 @@ func (h *HttpWorkerAdapter) List(rw http.ResponseWriter, req *http.Request) {
 	res, err := h.workerService.List(req.Context(), credit)
 	if err != nil {
 		switch err {
-		default:
-			rw.WriteHeader(500)
-			json.NewEncoder(rw).Encode(err.Error())
-			return
+			case erro.ErrNotFound:
+				rw.WriteHeader(404)
+				json.NewEncoder(rw).Encode(err.Error())
+				return
+			default:
+				rw.WriteHeader(500)
+				json.NewEncoder(rw).Encode(err.Error())
+				return
 		}
 	}
 

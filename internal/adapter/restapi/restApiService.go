@@ -10,12 +10,11 @@ import(
 	"crypto/x509"
 	"crypto/tls"
 	"encoding/base64"
-	//"fmt"
 
+	"github.com/go-credit/internal/lib"
 	"github.com/rs/zerolog/log"
 	"github.com/go-credit/internal/erro"
 	"github.com/go-credit/internal/core"
-	"github.com/aws/aws-xray-sdk-go/xray"
 )
 
 var childLogger = log.With().Str("adapter/restapi", "restApiService").Logger()
@@ -96,10 +95,13 @@ func (r *RestApiService) makeGet(	ctx context.Context,
 	/*transport := &http.Transport{
 		TLSClientConfig: r.ClientTLSConf,
 	}
-	client := xray.Client(&http.Client{Timeout: time.Second * 5 , Transport: transport})*/
-	client := xray.Client(&http.Client{Timeout: time.Second * 5})
+	client := &http.Client{Timeout: time.Second * 5 , Transport: transport}*/
 
-	req, err := http.NewRequest("GET", url, nil)
+	span := lib.Span(ctx, url)	
+    defer span.End()
+
+	client := &http.Client{Timeout: time.Second * 10}
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
 	if err != nil {
 		childLogger.Error().Err(err).Msg("error Request")
 		return false, errors.New(err.Error())
@@ -150,13 +152,16 @@ func (r *RestApiService) makePost(	ctx context.Context,
 	/*transport := &http.Transport{
 		TLSClientConfig: r.ClientTLSConf,
 	})
-	client := xray.Client(&http.Client{Timeout: time.Second * 5, Transport: transport})*/
+	client := &http.Client{Timeout: time.Second * 5, Transport: transport}*/
+	
+	span := lib.Span(ctx, url)	
+    defer span.End()
 
-	client := xray.Client(&http.Client{Timeout: time.Second * 5})
+	client := &http.Client{Timeout: time.Second * 10}
 	payload := new(bytes.Buffer)
 	json.NewEncoder(payload).Encode(data)
 
-	req, err := http.NewRequest("POST", url, payload)
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, payload)
 	if err != nil {
 		childLogger.Error().Err(err).Msg("error Request")
 		return false, errors.New(err.Error())
