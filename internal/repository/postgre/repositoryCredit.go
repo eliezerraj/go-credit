@@ -9,17 +9,14 @@ import (
 	"database/sql"
 
 	"github.com/go-credit/internal/core"
-	"github.com/aws/aws-xray-sdk-go/xray"
-
+	"github.com/go-credit/internal/lib"
 )
 
 func (w WorkerRepository) Add(ctx context.Context, tx *sql.Tx ,credit core.AccountStatement) (*core.AccountStatement, error){
 	childLogger.Debug().Msg("Add")
 
-	_, root := xray.BeginSubsegment(ctx, "Repository.Add.Credit")
-	defer func() {
-		root.Close(nil)
-	}()
+	span := lib.Span(ctx, "repo.Add")	
+    defer span.End()
 
 	stmt, err := tx.Prepare(`INSERT INTO account_statement ( 	fk_account_id, 
 																type_charge,
@@ -54,10 +51,8 @@ func (w WorkerRepository) Add(ctx context.Context, tx *sql.Tx ,credit core.Accou
 func (w WorkerRepository) List(ctx context.Context, credit core.AccountStatement) (*[]core.AccountStatement, error){
 	childLogger.Debug().Msg("List")
 
-	_, root := xray.BeginSubsegment(ctx, "Repository.List.Credit")
-	defer func() {
-		root.Close(nil)
-	}()
+	span := lib.Span(ctx, "repo.List")	
+    defer span.End()
 
 	client:= w.databaseHelper.GetConnection()
 	

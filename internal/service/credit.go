@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"github.com/rs/zerolog/log"
+	
+	"github.com/go-credit/internal/lib"
 
 	"github.com/sony/gobreaker"
 	"github.com/mitchellh/mapstructure"
@@ -11,8 +13,6 @@ import (
 	"github.com/go-credit/internal/erro"
 	"github.com/go-credit/internal/adapter/restapi"
 	"github.com/go-credit/internal/repository/postgre"
-	"github.com/aws/aws-xray-sdk-go/xray"
-
 )
 
 var childLogger = log.With().Str("service", "service").Logger()
@@ -53,7 +53,7 @@ func (s WorkerService) Add(ctx context.Context, credit core.AccountStatement) (*
 	childLogger.Debug().Msg("Add")
 	childLogger.Debug().Interface("credit:",credit).Msg("")
 
-	_, root := xray.BeginSubsegment(ctx, "Service.Add")
+	span := lib.Span(ctx, "service.get")	
 
 	tx, err := s.workerRepository.StartTx(ctx)
 	if err != nil {
@@ -66,7 +66,7 @@ func (s WorkerService) Add(ctx context.Context, credit core.AccountStatement) (*
 		} else {
 			tx.Commit()
 		}
-		root.Close(nil)
+		span.End()
 	}()
 
 	// BEGIN ------- Mock Circuit Breaker
@@ -78,7 +78,8 @@ func (s WorkerService) Add(ctx context.Context, credit core.AccountStatement) (*
 	})
 
 	if (err != nil) {
-		_, segCB := xray.BeginSubsegment(ctx, "Service.CIRCUIT-BREAKER")
+
+		spanCB := lib.Span(ctx, "service.CIRCUIT-BREAKER")	
 
 		childLogger.Debug().Msg("--------------------------------------------------")
 		childLogger.Error().Err(err).Msg(" ****** Circuit Breaker OPEN !!! ******")
@@ -100,7 +101,7 @@ func (s WorkerService) Add(ctx context.Context, credit core.AccountStatement) (*
 
 		credit.Obs =  "Transação enviada via Circuit Breaker !!!!"
 		
-		segCB.Close(nil)
+		spanCB.End()
 		return &credit, nil
 	}
 	// END --------- Mock Circuit Breaker
@@ -154,8 +155,8 @@ func (s WorkerService) List(ctx context.Context, credit core.AccountStatement) (
 	childLogger.Debug().Msg("List")
 	childLogger.Debug().Interface("credit:",credit).Msg("")
 	
-	_, root := xray.BeginSubsegment(ctx, "Service.List")
-	defer root.Close(nil)
+	span := lib.Span(ctx, "service.List")	
+    defer span.End()
 
 	rest_interface_data, err := s.restApiService.GetData(	ctx, 
 															s.restEndpoint.ServiceUrlDomain, 

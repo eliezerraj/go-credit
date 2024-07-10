@@ -9,7 +9,6 @@ import (
 	"database/sql"
 
 	"github.com/go-credit/internal/erro"
-
 )
 
 var childLogger = log.With().Str("repository", "WorkerRepository").Logger()
