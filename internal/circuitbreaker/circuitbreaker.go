@@ -1,8 +1,8 @@
 package circuitbreaker
 
 import (
+    "time"
 	"github.com/sony/gobreaker"
-	"time"
     "github.com/go-credit/internal/erro"
 )
 

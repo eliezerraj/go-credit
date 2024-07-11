@@ -53,6 +53,9 @@ func (r *RestApiService) GetData(ctx context.Context,
 								xApigwId string,
 								data interface{} ) (interface{}, error) {
 	childLogger.Debug().Msg("GetData")
+	
+	span := lib.Span(ctx, "adapter.GetData")	
+    defer span.End()
 
 	data_interface, err := r.makeGet(ctx, urlDomain, http.MethodGet, xApigwId, data)
 	if err != nil {
@@ -68,6 +71,9 @@ func (r *RestApiService) PostData(	ctx context.Context,
 									xApigwId string, 
 									data interface{}) (interface{}, error) {
 	childLogger.Debug().Msg("PostData")
+
+	span := lib.Span(ctx, "adapter.PostData")	
+    defer span.End()
 
 	data_interface, err := r.makePost(ctx, urlDomain, http.MethodPost, xApigwId, data)
 	if err != nil {
@@ -92,11 +98,11 @@ func (r *RestApiService) makeGet(	ctx context.Context,
 	}
 	client := &http.Client{Timeout: time.Second * 5 , Transport: transport}*/
 
-	span := lib.Span(ctx, url)	
+	span, ctxSpan := lib.SpanCtx(ctx, "adapter.GetData.makeGet: " + url)	
     defer span.End()
 
 	client := &http.Client{Timeout: time.Second * 10}
-	req, err := http.NewRequestWithContext(ctx, method, url, nil)
+	req, err := http.NewRequestWithContext(ctxSpan, method, url, nil)
 	if err != nil {
 		childLogger.Error().Err(err).Msg("error Request")
 		return false, errors.New(err.Error())
@@ -104,7 +110,7 @@ func (r *RestApiService) makeGet(	ctx context.Context,
 	req.Header.Add("Content-Type", "application/json;charset=UTF-8");
 	req.Header.Add("x-apigw-api-id", xApigwId);
 
-	resp, err := client.Do(req.WithContext(ctx))
+	resp, err := client.Do(req.WithContext(ctxSpan))
 	if err != nil {
 		childLogger.Error().Err(err).Msg("error Do Request")
 		return false, errors.New(err.Error())
