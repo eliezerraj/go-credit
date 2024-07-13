@@ -10,7 +10,7 @@ spec:
     apiVersion: apps/v1
     kind: Deployment
     name: go-credit
-  minReplicas: 1
+  minReplicas: 2
   maxReplicas: 6
   metrics:
   - type: Resource
@@ -24,4 +24,17 @@ spec:
       name: memory
       target:
         type: Utilization
-        averageUtilization: 80
+        averageUtilization: 90
+  behavior:
+    scaleUp:
+      stabilizationWindowSeconds: 15
+      policies:
+      - type: Pods #Percent
+        value: 1 #100
+        periodSeconds: 15  
+    scaleDown:
+      stabilizationWindowSeconds: 15
+      policies:
+      - type: Pods
+        value: 1
+        periodSeconds: 15
