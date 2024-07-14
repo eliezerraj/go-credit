@@ -21,3 +21,6 @@ data:
   X_APIGW_API_ID: "129t4y8eoj"
   SERVICE_URL_DOMAIN_CB: https://go-fund-transfer.architecture.caradhras.io
   X_APIGW_API_ID_CB: ""
+
+  OTEL_EXPORTER_OTLP_ENDPOINT: "localhost:4317"
+  ENV: "dev"
