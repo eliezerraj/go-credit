@@ -12,7 +12,6 @@ import(
 	"github.com/go-credit/internal/util"
 	"github.com/go-credit/internal/core"
 	"github.com/go-credit/internal/service"
-	//"github.com/go-credit/internal/repository/postgre"
 	"github.com/go-credit/internal/repository/pg"
 	"github.com/go-credit/internal/adapter/restapi"
 )
@@ -53,24 +52,9 @@ func main() {
 
 	// Open Database
 	count := 1
-	//var databaseHelper	postgre.DatabaseHelper
 	var databasePG	pg.DatabasePG
 	var err error
 	for {
-		/*databaseHelper, err = postgre.NewDatabaseHelper(ctx, appServer.Database)
-		if err != nil {
-			if count < 3 {
-				log.Error().Err(err).Msg("Erro open Database... trying again !!")
-			} else {
-				log.Error().Err(err).Msg("Fatal erro open Database aborting")
-				panic(err)
-			}
-			time.Sleep(3 * time.Second)
-			count = count + 1
-			continue
-		}
-		//break*/
-
 		databasePG, err = pg.NewDatabasePGServer(ctx, appServer.Database)
 		if err != nil {
 			if count < 3 {
@@ -86,14 +70,11 @@ func main() {
 		break
 	}
 	
-	//repoDB := postgre.NewWorkerRepository(databaseHelper)
 	repoDatabase := pg.NewWorkerRepository(databasePG)
-
 	// Setup workload
 	circuitBreaker := circuitbreaker.CircuitBreakerConfig()
 	restApiService	:= restapi.NewRestApiService()
-	workerService := service.NewWorkerService(	//&repoDB,
-												&repoDatabase, 
+	workerService := service.NewWorkerService(	&repoDatabase, 
 												appServer.RestEndpoint,
 												restApiService, 
 												circuitBreaker)

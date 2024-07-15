@@ -11,29 +11,25 @@ import (
 	"github.com/go-credit/internal/erro"
 	"github.com/go-credit/internal/lib"
 	"github.com/go-credit/internal/adapter/restapi"
-	//"github.com/go-credit/internal/repository/postgre"
 	"github.com/go-credit/internal/repository/pg"
 )
 
 var childLogger = log.With().Str("service", "service").Logger()
 
 type WorkerService struct {
-	//workerRepository 		*postgre.WorkerRepository
 	workerRepo		 		*pg.WorkerRepository
 	restEndpoint			*core.RestEndpoint
 	restApiService			*restapi.RestApiService
 	circuitBreaker			*gobreaker.CircuitBreaker
 }
 
-func NewWorkerService( //workerRepository *postgre.WorkerRepository,
-						workerRepo		 	*pg.WorkerRepository,
+func NewWorkerService(	workerRepo		 	*pg.WorkerRepository,
 						restEndpoint		*core.RestEndpoint,
 						restApiService		*restapi.RestApiService,
 						circuitBreaker		*gobreaker.CircuitBreaker) *WorkerService{
 	childLogger.Debug().Msg("NewWorkerService")
 
 	return &WorkerService{
-		//workerRepository:	workerRepository,
 		workerRepo: 		workerRepo,
 		restEndpoint:		restEndpoint,
 		restApiService:		restApiService,
