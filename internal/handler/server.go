@@ -60,6 +60,7 @@ func (h HttpServer) StartHttpAppServer(	ctx context.Context,
 			childLogger.Error().Err(err).Msg("Erro closing OTEL tracer !!!")
 		}
 	}()
+	
 	otel.SetTextMapPropagator(xray.Propagator{})
 	otel.SetTracerProvider(tp)
 

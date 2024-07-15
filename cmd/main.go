@@ -82,7 +82,5 @@ func main() {
 	httpWorkerAdapter := handler.NewHttpWorkerAdapter(workerService)
 	httpServer := handler.NewHttpAppServer(appServer.Server)
 
-	httpServer.StartHttpAppServer(	ctx, 
-									&httpWorkerAdapter,
-									&appServer)
+	httpServer.StartHttpAppServer(ctx, &httpWorkerAdapter, &appServer)
 }

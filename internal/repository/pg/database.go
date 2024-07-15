@@ -40,6 +40,11 @@ func NewDatabasePGServer(ctx context.Context, databaseRDS *core.DatabaseRDS) (Da
 		return DatabasePGServer{}, err
 	}
 	
+	err = connPool.Ping(ctx)
+	if err != nil {
+		return DatabasePGServer{}, err
+	}
+
 	return DatabasePGServer{
 		connPool: connPool,
 	}, nil
@@ -53,6 +58,10 @@ func (d DatabasePGServer) GetConnection() (*pgxpool.Pool) {
 func (d DatabasePGServer) CloseConnection() {
 	childLogger.Debug().Msg("CloseConnection")
 	defer d.connPool.Close()
+}
+
+func (d DatabasePGServer) Ping(ctx context.Context) error {
+	return d.connPool.Ping(ctx)
 }
 
 type WorkerRepository struct {
@@ -127,23 +136,23 @@ func (w WorkerRepository) Add(ctx context.Context, tx pgx.Tx, credit core.Accoun
 	
 	credit.ChargeAt = time.Now()
 
-	_, err := tx.Exec(ctx, `INSERT INTO account_statement ( 	fk_account_id, 
-																type_charge,
-																charged_at, 
-																currency,
-																amount,
-																tenant_id) 
-									VALUES($1, $2, $3, $4, $5, $6) `, 
-															credit.FkAccountID, 
-															credit.Type,
-															time.Now(),
-															credit.Currency,
-															credit.Amount,
-															credit.TenantID)
-	if err != nil {
+	query := `INSERT INTO account_statement (fk_account_id, 
+											type_charge,
+											charged_at, 
+											currency,
+											amount,
+											tenant_id) 
+									VALUES($1, $2, $3, $4, $5, $6) RETURNING id`
+
+	row := tx.QueryRow(ctx, query, credit.FkAccountID, credit.Type, time.Now(), credit.Currency, credit.Amount, credit.TenantID)								
+	
+	var id int
+	if err := row.Scan(&id); err != nil {
 		childLogger.Error().Err(err).Msg("INSERT statement")
 		return nil, errors.New(err.Error())
 	}
+
+	credit.ID = id
 
 	return &credit , nil
 }
@@ -159,15 +168,17 @@ func (w WorkerRepository) List(ctx context.Context, credit core.AccountStatement
 	result_query := core.AccountStatement{}
 	balance_list := []core.AccountStatement{}
 
-	rows, err := conn.Query(ctx, `SELECT id, 
-													fk_account_id, 
-													type_charge,
-													charged_at,
-													currency, 
-													amount,																										
-													tenant_id	
-											FROM account_statement 
-											WHERE fk_account_id =$1 and type_charge= $2 order by charged_at desc`, credit.FkAccountID, credit.Type)
+	query := `SELECT id, 
+					fk_account_id, 
+					type_charge,
+					charged_at,
+					currency, 
+					amount,																										
+					tenant_id	
+					FROM account_statement 
+					WHERE fk_account_id =$1 and type_charge= $2 order by charged_at desc`
+
+	rows, err := conn.Query(ctx, query, credit.FkAccountID, credit.Type)
 	if err != nil {
 		childLogger.Error().Err(err).Msg("SELECT statement")
 		return nil, errors.New(err.Error())
