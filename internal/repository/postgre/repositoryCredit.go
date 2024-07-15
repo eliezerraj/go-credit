@@ -12,6 +12,7 @@ import (
 	"github.com/go-credit/internal/lib"
 )
 
+/*
 func (w WorkerRepository) Add(ctx context.Context, tx *sql.Tx ,credit core.AccountStatement) (*core.AccountStatement, error){
 	childLogger.Debug().Msg("Add")
 
@@ -92,3 +93,4 @@ func (w WorkerRepository) List(ctx context.Context, credit core.AccountStatement
 	defer rows.Close()
 	return &balance_list , nil
 }
+*/

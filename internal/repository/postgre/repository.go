@@ -11,6 +11,7 @@ import (
 	"github.com/go-credit/internal/erro"
 )
 
+/*
 var childLogger = log.With().Str("repository", "WorkerRepository").Logger()
 
 type WorkerRepository struct {
@@ -100,3 +101,4 @@ func (w WorkerRepository) Ping(ctx context.Context) (bool, error) {
 
 	return true, nil
 }
+*/

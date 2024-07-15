@@ -51,7 +51,6 @@ or
 
 Add -host header in PostMan
 
-
 ## AWS
 
 Create a public apigw

@@ -9,7 +9,7 @@ import (
 	"github.com/go-credit/internal/core"
 )
 
-type DatabaseHelper interface {
+/*type DatabaseHelper interface {
 	GetConnection() (*sql.DB)
 }
 
@@ -46,4 +46,4 @@ func NewDatabaseHelper(	ctx context.Context,
 func (d DatabaseHelperImplementacion) GetConnection() (*sql.DB) {
 	childLogger.Debug().Msg("GetConnection")
 	return d.client
-}
+}*/
