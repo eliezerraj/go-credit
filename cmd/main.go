@@ -73,11 +73,8 @@ func main() {
 	repoDatabase := pg.NewWorkerRepository(databasePG)
 	// Setup workload
 	circuitBreaker := circuitbreaker.CircuitBreakerConfig()
-	restApiService	:= restapi.NewRestApiService()
-	workerService := service.NewWorkerService(	&repoDatabase, 
-												appServer.RestEndpoint,
-												restApiService, 
-												circuitBreaker)
+	restApiService	:= restapi.NewRestApiService(&appServer)
+	workerService := service.NewWorkerService(&repoDatabase, &appServer, restApiService,circuitBreaker)
 
 	httpWorkerAdapter := handler.NewHttpWorkerAdapter(workerService)
 	httpServer := handler.NewHttpAppServer(appServer.Server)

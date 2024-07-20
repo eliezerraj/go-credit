@@ -16,12 +16,16 @@ data:
   DB_DRIVER: "postgres"
   TLS: "false"    
   SETPOD_AZ: "false"
- 
+  ENV: "dev"
+
   SERVICE_URL_DOMAIN: "https://vpce.global.dev.caradhras.io/pv" # call inside the cluster
   X_APIGW_API_ID: "129t4y8eoj"
+
   SERVICE_URL_DOMAIN_CB: "https://go-fund-transfer.architecture.caradhras.io"
   X_APIGW_API_ID_CB: ""
+
   OTEL_EXPORTER_OTLP_ENDPOINT: "arch-eks-01-xray-collector.default.svc.cluster.local:4317"
-  ENV: "dev"
+
+
  #SERVER_URL_DOMAIN: "http://svc-go-account.test-a.svc.cluster.local:5000"
   #SERVER_URL_DOMAIN: "https://go-account.architecture.caradhras.io"
