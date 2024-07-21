@@ -115,7 +115,6 @@ func (s WorkerService) Add(ctx context.Context, credit core.AccountStatement) (*
 
 	path := s.appServer.RestEndpoint.ServiceUrlDomain + "/get/" + credit.AccountID
 	rest_interface_data, err := s.restApiService.CallRestApi(ctx,"GET", path, &s.appServer.RestEndpoint.XApigwId, nil)
-
 	if err != nil {
 		return nil, err
 	}

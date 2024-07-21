@@ -183,7 +183,7 @@ func (w WorkerRepository) Add(ctx context.Context, tx pgx.Tx, credit core.Accoun
 											tenant_id) 
 									VALUES($1, $2, $3, $4, $5, $6) RETURNING id`
 
-	row := tx.QueryRow(ctx, query, credit.FkAccountID, credit.Type, time.Now(), credit.Currency, credit.Amount, credit.TenantID)								
+	row := tx.QueryRow(ctx, query, credit.FkAccountID, credit.Type, credit.ChargeAt, credit.Currency, credit.Amount, credit.TenantID)								
 	
 	var id int
 	if err := row.Scan(&id); err != nil {
