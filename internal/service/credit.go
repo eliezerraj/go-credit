@@ -23,7 +23,7 @@ type WorkerService struct {
 	circuitBreaker			*gobreaker.CircuitBreaker
 }
 
-func NewWorkerService(	workerRepo		*pg.WorkerRepository,
+func NewWorkerService(workerRepo	*pg.WorkerRepository,
 						appServer		*core.AppServer,
 						restApiService	*restapi.RestApiService,
 						circuitBreaker	*gobreaker.CircuitBreaker) *WorkerService{
