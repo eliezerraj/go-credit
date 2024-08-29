@@ -98,6 +98,11 @@ func (h HttpServer) StartHttpAppServer(	ctx context.Context,
 						http.HandlerFunc(httpWorkerAdapter.List),)
 	listCredit.Use(otelmux.Middleware("go-credit"))
 
+	listPerDateCredit := myRouter.Methods(http.MethodGet, http.MethodOptions).Subrouter()
+	listPerDateCredit.Handle("/listPerDate",
+						http.HandlerFunc(httpWorkerAdapter.ListPerDate),)
+	listPerDateCredit.Use(otelmux.Middleware("go-credit"))
+
 	srv := http.Server{
 		Addr:         ":" +  strconv.Itoa(h.httpServer.Port),      	
 		Handler:      myRouter,                	          

@@ -9,6 +9,7 @@ import (
 	"github.com/go-credit/internal/core"
 	"github.com/go-credit/internal/erro"
 	"github.com/go-credit/internal/lib"
+	"github.com/go-credit/internal/util"
 )
 
 var childLogger = log.With().Str("handler", "handler").Logger()
@@ -144,6 +145,48 @@ func (h *HttpWorkerAdapter) List(rw http.ResponseWriter, req *http.Request) {
 	credit.AccountID = varID
 	
 	res, err := h.workerService.List(req.Context(), credit)
+	if err != nil {
+		switch err {
+			case erro.ErrNotFound:
+				rw.WriteHeader(404)
+				json.NewEncoder(rw).Encode(err.Error())
+				return
+			default:
+				rw.WriteHeader(500)
+				json.NewEncoder(rw).Encode(err.Error())
+				return
+		}
+	}
+
+	json.NewEncoder(rw).Encode(res)
+	return
+}
+
+func (h *HttpWorkerAdapter) ListPerDate(rw http.ResponseWriter, req *http.Request) {
+	childLogger.Debug().Msg("ListPerDate")
+
+	span := lib.Span(req.Context(), "handler.ListPerDate")
+	defer span.End()
+
+	params := req.URL.Query()
+	varAcc := params.Get("account")
+	varDate := params.Get("date_start")
+
+	log.Debug().Interface("******* >>>>> params :", params).Msg("")
+
+	credit := core.AccountStatement{}
+	credit.AccountID = varAcc
+
+	convertDate, err := util.ConvertToDate(varDate)
+	if err != nil {
+		rw.WriteHeader(400)
+		json.NewEncoder(rw).Encode(err.Error())
+		return
+	}
+
+	credit.ChargeAt = *convertDate
+
+	res, err := h.workerService.ListPerDate(req.Context(), credit)
 	if err != nil {
 		switch err {
 			case erro.ErrNotFound:

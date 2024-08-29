@@ -5,6 +5,7 @@ import(
 	"strconv"
 	"net"
 	"context"
+	"time"
 
 	"github.com/joho/godotenv"
 	"github.com/rs/zerolog/log"
@@ -12,7 +13,6 @@ import(
 	"github.com/aws/aws-sdk-go-v2/config"
 
 	"github.com/go-credit/internal/core"
-
 )
 
 var childLogger = log.With().Str("util", "util").Logger()
@@ -103,4 +103,17 @@ func GetInfoPod() (	core.InfoPod,
 	}
 
 	return infoPod, server, restEndpoint
+}
+
+func ConvertToDate(date_str string) (*time.Time, error){
+	
+	layout := "2006-01-02"
+
+	date, err := time.Parse(layout, date_str)
+	if err != nil {
+		log.Error().Err(err).Msg("Error parsing date !!!")
+		return nil, err
+	}
+
+	return &date, nil
 }

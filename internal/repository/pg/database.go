@@ -292,3 +292,60 @@ func (w WorkerRepository) List(ctx context.Context, credit core.AccountStatement
 	defer rows.Close()
 	return &balance_list , nil
 }
+
+func (w WorkerRepository) ListPerDate(ctx context.Context, credit core.AccountStatement) (*[]core.AccountStatement, error){
+	childLogger.Debug().Msg("ListPerDate")
+
+	span := lib.Span(ctx, "repo.ListPerDate")	
+    defer span.End()
+
+	span = lib.Span(ctx, "repo.Acquire")
+	conn, err := w.databasePG.Acquire(ctx)
+	if err != nil {
+		childLogger.Error().Err(err).Msg("Erro Acquire")
+		return nil, errors.New(err.Error())
+	}
+	span.End()
+	defer w.databasePG.Release(conn)
+	
+	result_query := core.AccountStatement{}
+	balance_list := []core.AccountStatement{}
+
+	query := `SELECT id, 
+					fk_account_id, 
+					type_charge,
+					charged_at,
+					currency, 
+					amount,																										
+					tenant_id	
+			FROM account_statement 
+			WHERE fk_account_id =$1 
+			and type_charge= $2
+			and charged_at >= $3
+			order by charged_at desc`
+
+	rows, err := conn.Query(ctx, query, credit.FkAccountID, credit.Type, credit.ChargeAt)
+	if err != nil {
+		childLogger.Error().Err(err).Msg("SELECT statement")
+		return nil, errors.New(err.Error())
+	}
+
+	for rows.Next() {
+		err := rows.Scan( 	&result_query.ID, 
+							&result_query.FkAccountID, 
+							&result_query.Type, 
+							&result_query.ChargeAt,
+							&result_query.Currency,
+							&result_query.Amount,
+							&result_query.TenantID,
+						)
+		if err != nil {
+			childLogger.Error().Err(err).Msg("Scan statement")
+			return nil, errors.New(err.Error())
+        }
+		balance_list = append(balance_list, result_query)
+	}
+
+	defer rows.Close()
+	return &balance_list , nil
+}

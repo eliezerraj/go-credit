@@ -41,6 +41,8 @@ go-credit (post:add/fund) == (REST) ==> go-account (service.AddFundBalanceAccoun
 
         curl svc01.domain.com/list/ACC-1 | jq
 
++ GET /listPerDate?account=ACC-1&date_start=2024-07-24
+
 ## K8 local
 
 Add in hosts file /etc/hosts the lines below

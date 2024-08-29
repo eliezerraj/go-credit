@@ -174,3 +174,35 @@ func (s WorkerService) List(ctx context.Context, credit core.AccountStatement) (
 
 	return res, nil
 }
+
+func (s WorkerService) ListPerDate(ctx context.Context, credit core.AccountStatement) (*[]core.AccountStatement, error){
+	childLogger.Debug().Msg("ListPerDate")
+	childLogger.Debug().Interface("credit:",credit).Msg("")
+	
+	span := lib.Span(ctx, "service.List")	
+    defer span.End()
+
+	path := s.appServer.RestEndpoint.ServiceUrlDomain + "/get/" + credit.AccountID
+	rest_interface_data, err := s.restApiService.CallRestApi(ctx,"GET", path, &s.appServer.RestEndpoint.XApigwId, nil)
+
+	if err != nil {
+		return nil, err
+	}
+
+	var account_parsed core.Account
+	err = mapstructure.Decode(rest_interface_data, &account_parsed)
+    if err != nil {
+		childLogger.Error().Err(err).Msg("error parse interface")
+		return nil, errors.New(err.Error())
+    }
+
+	credit.FkAccountID = account_parsed.ID
+	credit.Type = "CREDIT"
+
+	res, err := s.workerRepo.ListPerDate(ctx, credit)
+	if err != nil {
+		return nil, err
+	}
+
+	return res, nil
+}
