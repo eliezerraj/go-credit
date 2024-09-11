@@ -105,27 +105,26 @@ func (h *HttpWorkerAdapter) Add( rw http.ResponseWriter, req *http.Request) {
 	credit := core.AccountStatement{}
 	err := json.NewDecoder(req.Body).Decode(&credit)
     if err != nil {
-		rw.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(rw).Encode(erro.ErrUnmarshal.Error())
-        return
+		apiError := NewAPIError(500, erro.ErrUnmarshal)
+		rw.WriteHeader(apiError.StatusCode)
+		json.NewEncoder(rw).Encode(apiError)
+		return
     }
 
 	res, err := h.workerService.Add(req.Context(), credit)
 	if err != nil {
+		var apiError APIError
 		switch err {
 			case erro.ErrNotFound:
-				rw.WriteHeader(404)
-				json.NewEncoder(rw).Encode(err.Error())
-				return
+				apiError = NewAPIError(404, err)
 			case erro.ErrTransInvalid:
-				rw.WriteHeader(409)
-				json.NewEncoder(rw).Encode(err.Error())
-				return
+				apiError = NewAPIError(409, err)
 			default:
-				rw.WriteHeader(500)
-				json.NewEncoder(rw).Encode(err.Error())
-				return
+				apiError = NewAPIError(500, err)n
 		}
+		rw.WriteHeader(apiError.StatusCode)
+		json.NewEncoder(rw).Encode(apiError)
+		return
 	}
 
 	json.NewEncoder(rw).Encode(res)
@@ -133,7 +132,7 @@ func (h *HttpWorkerAdapter) Add( rw http.ResponseWriter, req *http.Request) {
 }
 
 func (h *HttpWorkerAdapter) List(rw http.ResponseWriter, req *http.Request) {
-	childLogger.Debug().Msg("List")
+	childLogger.Debug().Msg("List@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
 
 	span := lib.Span(req.Context(), "handler.List")
 	defer span.End()
@@ -146,16 +145,16 @@ func (h *HttpWorkerAdapter) List(rw http.ResponseWriter, req *http.Request) {
 	
 	res, err := h.workerService.List(req.Context(), credit)
 	if err != nil {
+		var apiError APIError
 		switch err {
 			case erro.ErrNotFound:
-				rw.WriteHeader(404)
-				json.NewEncoder(rw).Encode(err.Error())
-				return
+				apiError = NewAPIError(404, err)
 			default:
-				rw.WriteHeader(500)
-				json.NewEncoder(rw).Encode(err.Error())
-				return
+				apiError = NewAPIError(500, err)
 		}
+		rw.WriteHeader(apiError.StatusCode)
+		json.NewEncoder(rw).Encode(apiError)
+		return
 	}
 
 	json.NewEncoder(rw).Encode(res)
@@ -188,16 +187,16 @@ func (h *HttpWorkerAdapter) ListPerDate(rw http.ResponseWriter, req *http.Reques
 
 	res, err := h.workerService.ListPerDate(req.Context(), credit)
 	if err != nil {
+		var apiError APIError
 		switch err {
 			case erro.ErrNotFound:
-				rw.WriteHeader(404)
-				json.NewEncoder(rw).Encode(err.Error())
-				return
+				apiError = NewAPIError(404, err)
 			default:
-				rw.WriteHeader(500)
-				json.NewEncoder(rw).Encode(err.Error())
-				return
+				apiError = NewAPIError(500, err)n
 		}
+		rw.WriteHeader(apiError.StatusCode)
+		json.NewEncoder(rw).Encode(apiError)
+		return
 	}
 
 	json.NewEncoder(rw).Encode(res)
