@@ -108,7 +108,7 @@ func (w WorkerRepository) ReleaseTx(connection *pgxpool.Conn) {
 }
 //-----------------------------------------------
 
-func (w WorkerRepository) Add(ctx context.Context, tx pgx.Tx, credit core.AccountStatement) (*core.AccountStatement, error){
+func (w WorkerRepository) Add(ctx context.Context, tx pgx.Tx, credit *core.AccountStatement) (*core.AccountStatement, error){
 	childLogger.Debug().Msg("Add")
 
 	span := lib.Span(ctx, "repo.Add")	
@@ -134,10 +134,10 @@ func (w WorkerRepository) Add(ctx context.Context, tx pgx.Tx, credit core.Accoun
 
 	credit.ID = id
 
-	return &credit , nil
+	return credit , nil
 }
 
-func (w WorkerRepository) List(ctx context.Context, credit core.AccountStatement) (*[]core.AccountStatement, error){
+func (w WorkerRepository) List(ctx context.Context, credit *core.AccountStatement) (*[]core.AccountStatement, error){
 	childLogger.Debug().Msg("List")
 
 	span := lib.Span(ctx, "repo.List")	
@@ -191,7 +191,7 @@ func (w WorkerRepository) List(ctx context.Context, credit core.AccountStatement
 	return &balance_list , nil
 }
 
-func (w WorkerRepository) ListPerDate(ctx context.Context, credit core.AccountStatement) (*[]core.AccountStatement, error){
+func (w WorkerRepository) ListPerDate(ctx context.Context, credit *core.AccountStatement) (*[]core.AccountStatement, error){
 	childLogger.Debug().Msg("ListPerDate")
 
 	span := lib.Span(ctx, "repo.ListPerDate")	

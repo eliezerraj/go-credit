@@ -48,7 +48,7 @@ func (s WorkerService) SetSessionVariable(ctx context.Context, userCredential st
 	return res, nil
 }
 
-func (s WorkerService) Add(ctx context.Context, credit core.AccountStatement) (*core.AccountStatement, error){
+func (s WorkerService) Add(ctx context.Context, credit *core.AccountStatement) (*core.AccountStatement, error){
 	childLogger.Debug().Msg("Add")
 	childLogger.Debug().Interface("credit:",credit).Msg("")
 
@@ -99,7 +99,7 @@ func (s WorkerService) Add(ctx context.Context, credit core.AccountStatement) (*
 		credit.Obs =  "Transação enviada via Circuit Breaker !!!!"
 		
 		spanCB.End()
-		return &credit, nil
+		return credit, nil
 	}
 	// END --------- Mock Circuit Breaker
 
@@ -143,7 +143,7 @@ func (s WorkerService) Add(ctx context.Context, credit core.AccountStatement) (*
 	return res, nil
 }
 
-func (s WorkerService) List(ctx context.Context, credit core.AccountStatement) (*[]core.AccountStatement, error){
+func (s WorkerService) List(ctx context.Context, credit *core.AccountStatement) (*[]core.AccountStatement, error){
 	childLogger.Debug().Msg("List")
 	childLogger.Debug().Interface("credit:",credit).Msg("")
 	
@@ -175,7 +175,7 @@ func (s WorkerService) List(ctx context.Context, credit core.AccountStatement) (
 	return res, nil
 }
 
-func (s WorkerService) ListPerDate(ctx context.Context, credit core.AccountStatement) (*[]core.AccountStatement, error){
+func (s WorkerService) ListPerDate(ctx context.Context, credit *core.AccountStatement) (*[]core.AccountStatement, error){
 	childLogger.Debug().Msg("ListPerDate")
 	childLogger.Debug().Interface("credit:",credit).Msg("")
 	

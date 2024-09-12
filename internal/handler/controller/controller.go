@@ -104,22 +104,22 @@ func (h *HttpWorkerAdapter) Add( rw http.ResponseWriter, req *http.Request) {
 	credit := core.AccountStatement{}
 	err := json.NewDecoder(req.Body).Decode(&credit)
     if err != nil {
-		apiError := NewAPIError(500, erro.ErrUnmarshal)
+		apiError := NewAPIError(400, erro.ErrUnmarshal)
 		rw.WriteHeader(apiError.StatusCode)
 		json.NewEncoder(rw).Encode(apiError)
 		return
     }
 
-	res, err := h.workerService.Add(req.Context(), credit)
+	res, err := h.workerService.Add(req.Context(), &credit)
 	if err != nil {
 		var apiError APIError
 		switch err {
-		case erro.ErrNotFound:
-			apiError = NewAPIError(404, err)
-		case erro.ErrTransInvalid:
-			apiError = NewAPIError(409, err)
-		default:
-			apiError = NewAPIError(500, err)
+			case erro.ErrNotFound:
+				apiError = NewAPIError(404, err)
+			case erro.ErrTransInvalid:
+				apiError = NewAPIError(409, err)
+			default:
+				apiError = NewAPIError(500, err)
 		}
 		rw.WriteHeader(apiError.StatusCode)
 		json.NewEncoder(rw).Encode(apiError)
@@ -142,14 +142,14 @@ func (h *HttpWorkerAdapter) List(rw http.ResponseWriter, req *http.Request) {
 	credit := core.AccountStatement{}
 	credit.AccountID = varID
 	
-	res, err := h.workerService.List(req.Context(), credit)
+	res, err := h.workerService.List(req.Context(), &credit)
 	if err != nil {
 		var apiError APIError
 		switch err {
-		case erro.ErrNotFound:
-			apiError = NewAPIError(404, err)
-		default:
-			apiError = NewAPIError(500, err)
+			case erro.ErrNotFound:
+				apiError = NewAPIError(404, err)
+			default:
+				apiError = NewAPIError(500, err)
 		}
 		rw.WriteHeader(apiError.StatusCode)
 		json.NewEncoder(rw).Encode(apiError)
@@ -177,21 +177,22 @@ func (h *HttpWorkerAdapter) ListPerDate(rw http.ResponseWriter, req *http.Reques
 
 	convertDate, err := util.ConvertToDate(varDate)
 	if err != nil {
-		rw.WriteHeader(400)
-		json.NewEncoder(rw).Encode(err.Error())
+		apiError := NewAPIError(400, erro.ErrUnmarshal)
+		rw.WriteHeader(apiError.StatusCode)
+		json.NewEncoder(rw).Encode(apiError)
 		return
 	}
 
 	credit.ChargeAt = *convertDate
 
-	res, err := h.workerService.ListPerDate(req.Context(), credit)
+	res, err := h.workerService.ListPerDate(req.Context(), &credit)
 	if err != nil {
 		var apiError APIError
 		switch err {
-		case erro.ErrNotFound:
-			apiError = NewAPIError(404, err)
-		default:
-			apiError = NewAPIError(500, err)
+			case erro.ErrNotFound:
+				apiError = NewAPIError(404, err)
+			default:
+				apiError = NewAPIError(500, err)
 		}
 		rw.WriteHeader(apiError.StatusCode)
 		json.NewEncoder(rw).Encode(apiError)
