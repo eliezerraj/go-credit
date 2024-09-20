@@ -80,7 +80,6 @@ func (h HttpServer) StartHttpAppServer(	ctx context.Context,
 	addCredit := myRouter.Methods(http.MethodPost, http.MethodOptions).Subrouter()
 	addCredit.Handle("/add", 
 						http.HandlerFunc(httpWorkerAdapter.Add),)		
-	addCredit.Use(httpWorkerAdapter.DecoratorDB)
 	addCredit.Use(otelmux.Middleware("go-credit"))
 
 	listCredit := myRouter.Methods(http.MethodGet, http.MethodOptions).Subrouter()
