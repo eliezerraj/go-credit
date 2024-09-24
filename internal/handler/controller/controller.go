@@ -42,6 +42,11 @@ func NewAPIError(statusCode int, err error) APIError {
 	}
 }
 
+func WriteJSON(rw http.ResponseWriter, code int, v any) error{
+	rw.WriteHeader(code)
+	return json.NewEncoder(rw).Encode(v)
+}
+
 func (h *HttpWorkerAdapter) Health(rw http.ResponseWriter, req *http.Request) {
 	childLogger.Debug().Msg("Health")
 
@@ -110,7 +115,7 @@ func (h *HttpWorkerAdapter) ListPerDate(rw http.ResponseWriter, req *http.Reques
 
 	convertDate, err := util.ConvertToDate(varDate)
 	if err != nil {
-		apiError := NewAPIError(http.StatusNotFound, erro.ErrUnmarshal)
+		apiError := NewAPIError(http.StatusBadRequest, erro.ErrUnmarshal)
 		return apiError
 	}
 
@@ -156,9 +161,4 @@ func (h *HttpWorkerAdapter) List(rw http.ResponseWriter, req *http.Request) erro
 	}
 
 	return WriteJSON(rw, http.StatusOK, res)
-}
-
-func WriteJSON(rw http.ResponseWriter, code int, v any) error{
-	rw.WriteHeader(code)
-	return json.NewEncoder(rw).Encode(v)
 }
