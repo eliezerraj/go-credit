@@ -35,7 +35,7 @@ func (w WorkerRepository) StartTx(ctx context.Context) (pgx.Tx, *pgxpool.Conn,er
 
 	conn, err := w.databasePG.Acquire(ctx)
 	if err != nil {
-		childLogger.Error().Err(err).Msg("Erro Acquire")
+		childLogger.Error().Err(err).Msg("erro acquire")
 		return nil, nil, errors.New(err.Error())
 	}
 
@@ -74,7 +74,7 @@ func (w WorkerRepository) Add(ctx context.Context, tx pgx.Tx, credit *core.Accou
 	
 	var id int
 	if err := row.Scan(&id); err != nil {
-		childLogger.Error().Err(err).Msg("INSERT statement")
+		childLogger.Error().Err(err).Msg("error insert statement")
 		return nil, errors.New(err.Error())
 	}
 
@@ -91,7 +91,7 @@ func (w WorkerRepository) List(ctx context.Context, credit *core.AccountStatemen
 
 	conn, err := w.databasePG.Acquire(ctx)
 	if err != nil {
-		childLogger.Error().Err(err).Msg("Erro Acquire")
+		childLogger.Error().Err(err).Msg("erro acquire")
 		return nil, errors.New(err.Error())
 	}
 	defer w.databasePG.Release(conn)
@@ -111,7 +111,7 @@ func (w WorkerRepository) List(ctx context.Context, credit *core.AccountStatemen
 
 	rows, err := conn.Query(ctx, query, credit.FkAccountID, credit.Type)
 	if err != nil {
-		childLogger.Error().Err(err).Msg("SELECT statement")
+		childLogger.Error().Err(err).Msg("errt select statement")
 		return nil, errors.New(err.Error())
 	}
 
@@ -125,7 +125,7 @@ func (w WorkerRepository) List(ctx context.Context, credit *core.AccountStatemen
 							&result_query.TenantID,
 						)
 		if err != nil {
-			childLogger.Error().Err(err).Msg("Scan statement")
+			childLogger.Error().Err(err).Msg("erro scan statement")
 			return nil, errors.New(err.Error())
         }
 		balance_list = append(balance_list, result_query)
@@ -143,7 +143,7 @@ func (w WorkerRepository) ListPerDate(ctx context.Context, credit *core.AccountS
 
 	conn, err := w.databasePG.Acquire(ctx)
 	if err != nil {
-		childLogger.Error().Err(err).Msg("Erro Acquire")
+		childLogger.Error().Err(err).Msg("erro acquire")
 		return nil, errors.New(err.Error())
 	}
 	defer w.databasePG.Release(conn)
@@ -166,7 +166,7 @@ func (w WorkerRepository) ListPerDate(ctx context.Context, credit *core.AccountS
 
 	rows, err := conn.Query(ctx, query, credit.FkAccountID, credit.Type, credit.ChargeAt)
 	if err != nil {
-		childLogger.Error().Err(err).Msg("SELECT statement")
+		childLogger.Error().Err(err).Msg("erro select statement")
 		return nil, errors.New(err.Error())
 	}
 
@@ -180,7 +180,7 @@ func (w WorkerRepository) ListPerDate(ctx context.Context, credit *core.AccountS
 							&result_query.TenantID,
 						)
 		if err != nil {
-			childLogger.Error().Err(err).Msg("Scan statement")
+			childLogger.Error().Err(err).Msg("erro scan statement")
 			return nil, errors.New(err.Error())
         }
 		balance_list = append(balance_list, result_query)

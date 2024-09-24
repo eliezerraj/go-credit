@@ -85,7 +85,7 @@ func (s WorkerService) Add(ctx context.Context, credit *core.AccountStatement) (
 			return nil, err
 		}
 
-		credit.Obs =  "Transação enviada via Circuit Breaker !!!!"
+		credit.Obs =  "transaction send via circuit breaker !!!"
 		
 		spanCB.End()
 		return credit, nil

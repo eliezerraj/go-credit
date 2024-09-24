@@ -21,8 +21,6 @@ type HttpWorkerAdapter struct {
 }
 
 func NewHttpWorkerAdapter(workerService *service.WorkerService) HttpWorkerAdapter {
-	childLogger.Debug().Msg("NewHttpWorkerAdapter")
-	
 	return HttpWorkerAdapter{
 		workerService: workerService,
 	}
@@ -30,7 +28,11 @@ func NewHttpWorkerAdapter(workerService *service.WorkerService) HttpWorkerAdapte
 
 type APIError struct {
 	StatusCode	int  `json:"statusCode"`
-	Msg			any `json:"msg"`
+	Msg			string `json:"msg"`
+}
+
+func (e APIError) Error() string {
+	return e.Msg
 }
 
 func NewAPIError(statusCode int, err error) APIError {
@@ -45,7 +47,6 @@ func (h *HttpWorkerAdapter) Health(rw http.ResponseWriter, req *http.Request) {
 
 	health := true
 	json.NewEncoder(rw).Encode(health)
-	return
 }
 
 func (h *HttpWorkerAdapter) Live(rw http.ResponseWriter, req *http.Request) {
@@ -53,17 +54,15 @@ func (h *HttpWorkerAdapter) Live(rw http.ResponseWriter, req *http.Request) {
 
 	live := true
 	json.NewEncoder(rw).Encode(live)
-	return
 }
 
 func (h *HttpWorkerAdapter) Header(rw http.ResponseWriter, req *http.Request) {
 	childLogger.Debug().Msg("Header")
 	
 	json.NewEncoder(rw).Encode(req.Header)
-	return
 }
 
-func (h *HttpWorkerAdapter) Add( rw http.ResponseWriter, req *http.Request) {
+func (h *HttpWorkerAdapter) Add( rw http.ResponseWriter, req *http.Request) error{
 	childLogger.Debug().Msg("Add")
 
 	span := lib.Span(req.Context(), "handler.Add")
@@ -72,33 +71,67 @@ func (h *HttpWorkerAdapter) Add( rw http.ResponseWriter, req *http.Request) {
 	credit := core.AccountStatement{}
 	err := json.NewDecoder(req.Body).Decode(&credit)
     if err != nil {
-		apiError := NewAPIError(400, erro.ErrUnmarshal)
-		rw.WriteHeader(apiError.StatusCode)
-		json.NewEncoder(rw).Encode(apiError)
-		return
+		apiError := NewAPIError(http.StatusBadRequest, erro.ErrUnmarshal)
+		return apiError
     }
-
+	defer req.Body.Close()
+	
 	res, err := h.workerService.Add(req.Context(), &credit)
 	if err != nil {
 		var apiError APIError
 		switch err {
 			case erro.ErrNotFound:
-				apiError = NewAPIError(404, err)
+				apiError = NewAPIError(http.StatusNotFound, err)
 			case erro.ErrTransInvalid:
-				apiError = NewAPIError(409, err)
+				apiError = NewAPIError(http.StatusConflict, err)
 			default:
-				apiError = NewAPIError(500, err)
+				apiError = NewAPIError(http.StatusInternalServerError , err)
 		}
-		rw.WriteHeader(apiError.StatusCode)
-		json.NewEncoder(rw).Encode(apiError)
-		return
+		return apiError
 	}
 
-	json.NewEncoder(rw).Encode(res)
-	return
+	return WriteJSON(rw, http.StatusOK, res)
 }
 
-func (h *HttpWorkerAdapter) List(rw http.ResponseWriter, req *http.Request) {
+func (h *HttpWorkerAdapter) ListPerDate(rw http.ResponseWriter, req *http.Request) error{
+	childLogger.Debug().Msg("ListPerDate")
+
+	span := lib.Span(req.Context(), "handler.ListPerDate")
+	defer span.End()
+
+	params := req.URL.Query()
+	varAcc := params.Get("account")
+	varDate := params.Get("date_start")
+
+	//log.Debug().Interface("******* >>>>> params :", params).Msg("")
+
+	credit := core.AccountStatement{}
+	credit.AccountID = varAcc
+
+	convertDate, err := util.ConvertToDate(varDate)
+	if err != nil {
+		apiError := NewAPIError(http.StatusNotFound, erro.ErrUnmarshal)
+		return apiError
+	}
+
+	credit.ChargeAt = *convertDate
+
+	res, err := h.workerService.ListPerDate(req.Context(), &credit)
+	if err != nil {
+		var apiError APIError
+		switch err {
+			case erro.ErrNotFound:
+				apiError = NewAPIError(http.StatusNotFound, err)
+			default:
+				apiError = NewAPIError(http.StatusInternalServerError, err)
+		}
+		return apiError
+	}
+
+	return WriteJSON(rw, http.StatusOK, res)
+}
+
+func (h *HttpWorkerAdapter) List(rw http.ResponseWriter, req *http.Request) error {
 	childLogger.Debug().Msg("List")
 
 	span := lib.Span(req.Context(), "handler.List")
@@ -115,58 +148,17 @@ func (h *HttpWorkerAdapter) List(rw http.ResponseWriter, req *http.Request) {
 		var apiError APIError
 		switch err {
 			case erro.ErrNotFound:
-				apiError = NewAPIError(404, err)
+				apiError = NewAPIError(http.StatusNotFound, err)
 			default:
-				apiError = NewAPIError(500, err)
+				apiError = NewAPIError(http.StatusInternalServerError, err)
 		}
-		rw.WriteHeader(apiError.StatusCode)
-		json.NewEncoder(rw).Encode(apiError)
-		return
+		return apiError
 	}
 
-	json.NewEncoder(rw).Encode(res)
-	return
+	return WriteJSON(rw, http.StatusOK, res)
 }
 
-func (h *HttpWorkerAdapter) ListPerDate(rw http.ResponseWriter, req *http.Request) {
-	childLogger.Debug().Msg("ListPerDate")
-
-	span := lib.Span(req.Context(), "handler.ListPerDate")
-	defer span.End()
-
-	params := req.URL.Query()
-	varAcc := params.Get("account")
-	varDate := params.Get("date_start")
-
-	log.Debug().Interface("******* >>>>> params :", params).Msg("")
-
-	credit := core.AccountStatement{}
-	credit.AccountID = varAcc
-
-	convertDate, err := util.ConvertToDate(varDate)
-	if err != nil {
-		apiError := NewAPIError(400, erro.ErrUnmarshal)
-		rw.WriteHeader(apiError.StatusCode)
-		json.NewEncoder(rw).Encode(apiError)
-		return
-	}
-
-	credit.ChargeAt = *convertDate
-
-	res, err := h.workerService.ListPerDate(req.Context(), &credit)
-	if err != nil {
-		var apiError APIError
-		switch err {
-			case erro.ErrNotFound:
-				apiError = NewAPIError(404, err)
-			default:
-				apiError = NewAPIError(500, err)
-		}
-		rw.WriteHeader(apiError.StatusCode)
-		json.NewEncoder(rw).Encode(apiError)
-		return
-	}
-
-	json.NewEncoder(rw).Encode(res)
-	return
+func WriteJSON(rw http.ResponseWriter, code int, v any) error{
+	rw.WriteHeader(code)
+	return json.NewEncoder(rw).Encode(v)
 }

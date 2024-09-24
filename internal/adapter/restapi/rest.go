@@ -64,7 +64,7 @@ func (r *RestApiService) CallRestApi(	ctx context.Context,
 
 	req, err := http.NewRequestWithContext(ctxSpan, method, path, payload)
 	if err != nil {
-		childLogger.Error().Err(err).Msg("error Request")
+		childLogger.Error().Err(err).Msg("error request")
 		return false, errors.New(err.Error())
 	}
 
@@ -76,7 +76,7 @@ func (r *RestApiService) CallRestApi(	ctx context.Context,
 
 	resp, err := client.Do(req.WithContext(ctxSpan))
 	if err != nil {
-		childLogger.Error().Err(err).Msg("error Do Request")
+		childLogger.Error().Err(err).Msg("error do request")
 		return false, errors.New(err.Error())
 	}
 
@@ -98,7 +98,7 @@ func (r *RestApiService) CallRestApi(	ctx context.Context,
 	result := body
 	err = json.NewDecoder(resp.Body).Decode(&result)
     if err != nil {
-		childLogger.Error().Err(err).Msg("error no ErrUnmarshal")
+		childLogger.Error().Err(err).Msg("error errunmarshal")
 		return false, errors.New(err.Error())
     }
 

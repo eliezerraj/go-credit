@@ -30,8 +30,6 @@ type HttpServer struct {
 }
 
 func NewHttpAppServer(httpServer *core.Server) HttpServer {
-	childLogger.Debug().Msg("NewHttpAppServer")
-
 	return HttpServer{httpServer: httpServer }
 }
 //--------------------------------------------------------
@@ -47,7 +45,7 @@ func (h HttpServer) StartHttpAppServer(	ctx context.Context,
 	defer func() { 
 		err := tp.Shutdown(ctx)
 		if err != nil{
-			childLogger.Error().Err(err).Msg("Erro closing OTEL tracer !!!")
+			childLogger.Error().Err(err).Msg("error closing OTEL tracer !!!")
 		}
 	}()
 	
@@ -78,18 +76,15 @@ func (h HttpServer) StartHttpAppServer(	ctx context.Context,
     header.HandleFunc("/header", httpWorkerAdapter.Header)
 
 	addCredit := myRouter.Methods(http.MethodPost, http.MethodOptions).Subrouter()
-	addCredit.Handle("/add", 
-						http.HandlerFunc(httpWorkerAdapter.Add),)		
+	addCredit.HandleFunc("/add", middleware.MiddleWareErrorHandler(httpWorkerAdapter.Add))		
 	addCredit.Use(otelmux.Middleware("go-credit"))
 
 	listCredit := myRouter.Methods(http.MethodGet, http.MethodOptions).Subrouter()
-	listCredit.Handle("/list/{id}",
-						http.HandlerFunc(httpWorkerAdapter.List),)
+	listCredit.HandleFunc("/list/{id}",	middleware.MiddleWareErrorHandler(httpWorkerAdapter.List))
 	listCredit.Use(otelmux.Middleware("go-credit"))
 
 	listPerDateCredit := myRouter.Methods(http.MethodGet, http.MethodOptions).Subrouter()
-	listPerDateCredit.Handle("/listPerDate",
-						http.HandlerFunc(httpWorkerAdapter.ListPerDate),)
+	listPerDateCredit.HandleFunc("/listPerDate",middleware.MiddleWareErrorHandler(httpWorkerAdapter.ListPerDate))
 	listPerDateCredit.Use(otelmux.Middleware("go-credit"))
 
 	srv := http.Server{
@@ -105,7 +100,7 @@ func (h HttpServer) StartHttpAppServer(	ctx context.Context,
 	go func() {
 		err := srv.ListenAndServe()
 		if err != nil {
-			childLogger.Error().Err(err).Msg("Cancel http mux server !!!")
+			childLogger.Error().Err(err).Msg("canceling http mux server !!!")
 		}
 	}()
 
@@ -114,8 +109,8 @@ func (h HttpServer) StartHttpAppServer(	ctx context.Context,
 	<-ch
 
 	if err := srv.Shutdown(ctx); err != nil && err != http.ErrServerClosed {
-		childLogger.Error().Err(err).Msg("WARNING Dirty Shutdown !!!")
+		childLogger.Error().Err(err).Msg("warning dirty shutdown !!!")
 		return
 	}
-	childLogger.Info().Msg("Stop Done !!!!")
+	childLogger.Info().Msg("stop done !!!")
 }

@@ -95,7 +95,7 @@ func (d DatabasePGServer) Acquire(ctx context.Context) (*pgxpool.Conn, error) {
 
 	connection, err := d.connPool.Acquire(ctx)
 	if err != nil {
-		childLogger.Error().Err(err).Msg("Error while acquiring connection from the database pool!!")
+		childLogger.Error().Err(err).Msg("error while acquiring connection from the database pool !!!")
 		return nil, err
 	} 
 	return connection, nil
