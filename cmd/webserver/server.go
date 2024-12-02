@@ -21,13 +21,14 @@ import(
 var(
 	logLevel 	= 	zerolog.DebugLevel
 	appServer	core.AppServer
+	restApiCallData core.RestApiCallData
 )
 
 func init(){
 	log.Debug().Msg("init")
 	zerolog.SetGlobalLevel(logLevel)
 
-	infoPod , server, restEndpoint := util.GetInfoPod()
+	infoPod , server, restEndpoint, awsServiceConfig := util.GetInfoPod()
 	database := util.GetDatabaseEnv()
 	configOTEL := util.GetOtelEnv()
 	cert := util.GetCertEnv()
@@ -39,6 +40,7 @@ func init(){
 	appServer.RestEndpoint = &restEndpoint
 	appServer.Server.Cert = &cert
 	appServer.ConfigOTEL = &configOTEL
+	appServer.AwsServiceConfig = &awsServiceConfig
 }
 
 func Server() {

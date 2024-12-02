@@ -19,7 +19,8 @@ var childLogger = log.With().Str("util", "util").Logger()
 
 func GetInfoPod() (	core.InfoPod,
 					core.Server, 
-					core.RestEndpoint) {
+					core.RestEndpoint,
+					core.AwsServiceConfig) {
 	childLogger.Debug().Msg("GetInfoPod")
 
 	err := godotenv.Load(".env")
@@ -30,6 +31,7 @@ func GetInfoPod() (	core.InfoPod,
 	var infoPod 	core.InfoPod
 	var server		core.Server
 	var restEndpoint core.RestEndpoint
+	var awsServiceConfig core.AwsServiceConfig
 
 	server.ReadTimeout = 60
 	server.WriteTimeout = 60
@@ -102,7 +104,17 @@ func GetInfoPod() (	core.InfoPod,
 		restEndpoint.XApigwIdCB = os.Getenv("X_APIGW_API_ID_CB")
 	}
 
-	return infoPod, server, restEndpoint
+	if os.Getenv("SERVICE_URL_JWT_SA") !=  "" {	
+		awsServiceConfig.ServiceUrlJwtSA = os.Getenv("SERVICE_URL_JWT_SA")
+	}
+	if os.Getenv("SECRET_JWT_SA_CREDENTIAL") !=  "" {	
+		awsServiceConfig.SecretJwtSACredential = os.Getenv("SECRET_JWT_SA_CREDENTIAL")
+	}
+	if os.Getenv("AWS_REGION") !=  "" {
+		awsServiceConfig.AwsRegion = os.Getenv("AWS_REGION")
+	}
+
+	return infoPod, server, restEndpoint, awsServiceConfig
 }
 
 func ConvertToDate(date_str string) (*time.Time, error){
