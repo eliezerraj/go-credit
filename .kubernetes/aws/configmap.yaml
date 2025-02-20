@@ -6,7 +6,7 @@ metadata:
   labels:
     app: *app-name
 data:
-  API_VERSION: "2.1"
+  API_VERSION: "3.0"
   POD_NAME: "go-credit.k8"
   PORT: "5001"
   DB_HOST: "rds-proxy-db-arch.proxy-couoacqalfwt.us-east-2.rds.amazonaws.com"
@@ -17,15 +17,19 @@ data:
   TLS: "false"    
   SETPOD_AZ: "false"
   ENV: "dev"
-
-  SERVICE_URL_DOMAIN: "https://vpce.global.dev.caradhras.io/pv" # call inside the cluster
-  X_APIGW_API_ID: "129t4y8eoj"
-
-  SERVICE_URL_DOMAIN_CB: "https://go-fund-transfer.architecture.caradhras.io"
-  X_APIGW_API_ID_CB: ""
-
   OTEL_EXPORTER_OTLP_ENDPOINT: "arch-eks-01-xray-collector.default.svc.cluster.local:4317"
 
+  NAME_SERVICE_01: "go-account"
+  URL_SERVICE_01: "https://vpce.global.dev.caradhras.io/pv/get" # call inside the cluster
+  METHOD_SERVICE_01: "GET"
+  X_APIGW_API_ID_SERVICE_01: "129t4y8eoj"
 
- #SERVER_URL_DOMAIN: "http://svc-go-account.test-a.svc.cluster.local:5000"
+  NAME_SERVICE_02: "go-account"
+  URL_SERVICE_02: "https://vpce.global.dev.caradhras.io/pv/add/fund" # call inside the cluster
+  METHOD_SERVICE_02: "POST"
+  X_APIGW_API_ID_SERVICE_02: "129t4y8eoj"
+
+  #SERVICE_URL_DOMAIN_CB: "https://go-fund-transfer.architecture.caradhras.io"
+  #X_APIGW_API_ID_CB: ""
+  #SERVER_URL_DOMAIN: "http://svc-go-account.test-a.svc.cluster.local:5000"
   #SERVER_URL_DOMAIN: "https://go-account.architecture.caradhras.io"
