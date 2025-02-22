@@ -6,6 +6,7 @@ import(
 	"encoding/json"
 	"errors"
 
+	"github.com/go-credit/internal/infra/circuitbreaker"
 	"github.com/go-credit/internal/core/model"
 	"github.com/go-credit/internal/core/erro"
 	go_core_observ "github.com/eliezerraj/go-core/observability"
@@ -54,6 +55,41 @@ func (s *WorkerService) AddCredit(ctx context.Context, credit *model.AccountStat
 		s.workerRepository.DatabasePGServer.ReleaseTx(conn)
 		span.End()
 	}()
+
+	//Open CB - MOCK
+	circuitBreaker := circuitbreaker.CircuitBreakerConfig()
+	_, err = circuitBreaker.Execute(func() (interface{}, error) {
+		if credit.Type == "CREDIT-CB" {
+			return nil, erro.ErrTransInvalid
+		}
+		return nil , nil
+	})
+	if (err != nil) {
+		spanCB := tracerProvider.Span(ctx, "service.AddCredit-CIRCUIT-BREAKER")
+
+		childLogger.Debug().Msg("--------------------------------------------------")
+		childLogger.Error().Err(err).Msg(" ****** Circuit Breaker OPEN !!! ******")
+		childLogger.Debug().Msg("--------------------------------------------------")
+		
+		transfer := model.Transfer{}
+		transfer.Currency = credit.Currency
+		transfer.Amount = credit.Amount
+		transfer.AccountIDTo = credit.AccountID
+
+		_, _, err := apiService.CallApi(ctx,
+												s.apiService[2].Url,
+												s.apiService[2].Method,
+												&s.apiService[2].Header_x_apigw_api_id,
+												nil, 
+												transfer)
+		if err != nil {
+			return nil, err
+		}
+		credit.Obs =  "transaction send via circuit breaker !!!"
+		
+		spanCB.End()
+		return credit, nil
+	}
 
 	// Business rules
 	if credit.Type != "CREDIT" {

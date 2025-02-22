@@ -75,6 +75,8 @@ func (h *HttpRouters) AddCredit(rw http.ResponseWriter, req *http.Request) error
 		case erro.ErrTransInvalid:
 			core_apiError = core_apiError.NewAPIError(err, http.StatusConflict)
 		case erro.ErrInvalidAmount:
+			core_apiError = core_apiError.NewAPIError(err, http.StatusConflict)
+		case erro.ErrInvalidAmount:
 			core_apiError = core_apiError.NewAPIError(err, http.StatusConflict)	
 		default:
 			core_apiError = core_apiError.NewAPIError(err, http.StatusInternalServerError)
