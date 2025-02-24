@@ -99,7 +99,7 @@ func (s *WorkerService) AddCredit(ctx context.Context, credit *model.AccountStat
 		return nil, erro.ErrInvalidAmount
 	}
 
-	// Get the Account ID from Account-service
+	// Get the Account ID (PK) from Account-service
 	res_payload, statusCode, err := apiService.CallApi(ctx,
 														s.apiService[0].Url + "/" + credit.AccountID,
 														s.apiService[0].Method,
@@ -121,13 +121,20 @@ func (s *WorkerService) AddCredit(ctx context.Context, credit *model.AccountStat
 	// Business rule
 	credit.FkAccountID = account_parsed.ID
 
-	// Add the credit
+	// Get transaction UUID 
+	res_uuid, err := s.workerRepository.GetTransactionUUID(ctx)
+	if err != nil {
+		return nil, err
+	}
+	credit.TransactionID = res_uuid
+
+	// Add the credit (create account_statement)
 	res, err := s.workerRepository.AddCredit(ctx, tx, credit)
 	if err != nil {
 		return nil, err
 	}
 
-	// Add (POST) the account statement Get the Account ID from Account-service
+	// Add (POST/AddFundBalanceAccount) the updat account statement 
 	_, statusCode, err = apiService.CallApi(ctx,
 											s.apiService[1].Url,
 											s.apiService[1].Method,

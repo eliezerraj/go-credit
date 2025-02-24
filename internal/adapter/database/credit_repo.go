@@ -6,8 +6,6 @@ import (
 	"errors"
 	
 	"github.com/go-credit/internal/core/model"
-	//"github.com/go-credit/internal/core/erro"
-
 	go_core_observ "github.com/eliezerraj/go-core/observability"
 	go_core_pg "github.com/eliezerraj/go-core/database/pg"
 
@@ -41,12 +39,13 @@ func (w WorkerRepository) AddCredit(ctx context.Context, tx pgx.Tx, credit *mode
 											charged_at, 
 											currency,
 											amount,
-											tenant_id) 
-			 VALUES($1, $2, $3, $4, $5, $6) RETURNING id`
+											tenant_id,
+											transaction_id) 
+			 VALUES($1, $2, $3, $4, $5, $6, $7) RETURNING id`
 
 	credit.ChargeAt = time.Now()
 
-	row := tx.QueryRow(ctx, query, credit.FkAccountID, credit.Type, credit.ChargeAt, credit.Currency, credit.Amount, credit.TenantID)								
+	row := tx.QueryRow(ctx, query, credit.FkAccountID, credit.Type, credit.ChargeAt, credit.Currency, credit.Amount, credit.TenantID, credit.TransactionID)								
 	var id int
 	if err := row.Scan(&id); err != nil {
 		return nil, errors.New(err.Error())
@@ -78,8 +77,9 @@ func (w WorkerRepository) ListCredit(ctx context.Context, credit *model.AccountS
 					charged_at,
 					currency, 
 					amount,																										
-					tenant_id	
-					FROM account_statement 
+					tenant_id,
+					transaction_id	
+				FROM account_statement 
 					WHERE fk_account_id =$1 and type_charge= $2 order by charged_at desc`
 
 	rows, err := conn.Query(ctx, query, credit.FkAccountID, credit.Type)
@@ -96,6 +96,7 @@ func (w WorkerRepository) ListCredit(ctx context.Context, credit *model.AccountS
 							&res_accountStatement.Currency,
 							&res_accountStatement.Amount,
 							&res_accountStatement.TenantID,
+							&res_accountStatement.TransactionID,
 						)
 		if err != nil {
 			return nil, errors.New(err.Error())
@@ -127,7 +128,8 @@ func (w WorkerRepository) ListCreditPerDate(ctx context.Context, credit *model.A
 					charged_at,
 					currency, 
 					amount,																										
-					tenant_id	
+					tenant_id,
+					transaction_id	
 			FROM account_statement 
 			WHERE fk_account_id =$1 
 			and type_charge= $2
@@ -148,6 +150,7 @@ func (w WorkerRepository) ListCreditPerDate(ctx context.Context, credit *model.A
 							&res_accountStatement.Currency,
 							&res_accountStatement.Amount,
 							&res_accountStatement.TenantID,
+							&res_accountStatement.TransactionID,
 						)
 		if err != nil {
 			return nil, errors.New(err.Error())
@@ -156,4 +159,40 @@ func (w WorkerRepository) ListCreditPerDate(ctx context.Context, credit *model.A
 	}
 	
 	return &res_accountStatement_list , nil
+}
+
+func (w WorkerRepository) GetTransactionUUID(ctx context.Context) (*string, error){
+	childLogger.Debug().Msg("GetTransactionUUID")
+	
+	// Trace
+	span := tracerProvider.Span(ctx, "database.GetTransactionUUID")
+	defer span.End()
+
+	conn, err := w.DatabasePGServer.Acquire(ctx)
+	if err != nil {
+		return nil, errors.New(err.Error())
+	}
+	defer w.DatabasePGServer.Release(conn)
+
+	// Prepare
+	var uuid string
+
+	// Query and Execute
+	query := `SELECT uuid_generate_v4()`
+
+	rows, err := conn.Query(ctx, query)
+	if err != nil {
+		return nil, errors.New(err.Error())
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		err := rows.Scan(&uuid) 
+		if err != nil {
+			return nil, errors.New(err.Error())
+        }
+		return &uuid, nil
+	}
+	
+	return &uuid, nil
 }
