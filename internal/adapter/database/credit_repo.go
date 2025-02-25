@@ -31,9 +31,14 @@ func NewWorkerRepository(databasePGServer *go_core_pg.DatabasePGServer) *WorkerR
 func (w WorkerRepository) AddCredit(ctx context.Context, tx pgx.Tx, credit *model.AccountStatement) (*model.AccountStatement, error){
 	childLogger.Debug().Msg("AddCredit")
 
+	//trace
 	span := tracerProvider.Span(ctx, "database.AddCredit")
 	defer span.End()
 
+	// Prepare
+	credit.ChargeAt = time.Now()
+
+	// Query e Execute
 	query := `INSERT INTO account_statement (fk_account_id, 
 											type_charge,
 											charged_at, 
@@ -42,8 +47,6 @@ func (w WorkerRepository) AddCredit(ctx context.Context, tx pgx.Tx, credit *mode
 											tenant_id,
 											transaction_id) 
 			 VALUES($1, $2, $3, $4, $5, $6, $7) RETURNING id`
-
-	credit.ChargeAt = time.Now()
 
 	row := tx.QueryRow(ctx, query, credit.FkAccountID, credit.Type, credit.ChargeAt, credit.Currency, credit.Amount, credit.TenantID, credit.TransactionID)								
 	var id int
@@ -59,9 +62,11 @@ func (w WorkerRepository) AddCredit(ctx context.Context, tx pgx.Tx, credit *mode
 func (w WorkerRepository) ListCredit(ctx context.Context, credit *model.AccountStatement) (*[]model.AccountStatement, error){
 	childLogger.Debug().Msg("ListCredit")
 	
+	// Trace
 	span := tracerProvider.Span(ctx, "database.ListCredit")
 	defer span.End()
 
+	// Prepare
 	conn, err := w.DatabasePGServer.Acquire(ctx)
 	if err != nil {
 		return nil, errors.New(err.Error())
@@ -71,6 +76,7 @@ func (w WorkerRepository) ListCredit(ctx context.Context, credit *model.AccountS
 	res_accountStatement := model.AccountStatement{}
 	res_accountStatement_list := []model.AccountStatement{}
 
+	// Query e Execute
 	query := `SELECT id, 
 					fk_account_id, 
 					type_charge,
@@ -110,9 +116,11 @@ func (w WorkerRepository) ListCredit(ctx context.Context, credit *model.AccountS
 func (w WorkerRepository) ListCreditPerDate(ctx context.Context, credit *model.AccountStatement) (*[]model.AccountStatement, error){
 	childLogger.Debug().Msg("ListCreditPerDate")
 	
+	// Trace
 	span := tracerProvider.Span(ctx, "database.ListCreditPerDate")
 	defer span.End()
 
+	// Prepare 
 	conn, err := w.DatabasePGServer.Acquire(ctx)
 	if err != nil {
 		return nil, errors.New(err.Error())
@@ -122,6 +130,7 @@ func (w WorkerRepository) ListCreditPerDate(ctx context.Context, credit *model.A
 	res_accountStatement := model.AccountStatement{}
 	res_accountStatement_list := []model.AccountStatement{}
 
+	// Query e Execute
 	query := `SELECT id, 
 					fk_account_id, 
 					type_charge,
