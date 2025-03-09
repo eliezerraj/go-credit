@@ -67,14 +67,17 @@ func (s *WorkerService) AddCredit(ctx context.Context, credit *model.AccountStat
 	if (err != nil) {
 		spanCB := tracerProvider.Span(ctx, "service.AddCredit-CIRCUIT-BREAKER")
 
-		childLogger.Debug().Msg("--------------------------------------------------")
+		childLogger.Debug().Msg("+++++++++++++++++++++++++++++++++++++++++++++++++")
 		childLogger.Error().Err(err).Msg(" ****** Circuit Breaker OPEN !!! ******")
-		childLogger.Debug().Msg("--------------------------------------------------")
+		childLogger.Debug().Msg("+++++++++++++++++++++++++++++++++++++++++++++++++")
 		
 		transfer := model.Transfer{}
 		transfer.Currency = credit.Currency
 		transfer.Amount = credit.Amount
-		transfer.AccountIDTo = credit.AccountID
+		transfer.Type = "CREDIT"
+		transfer.AccountFrom = credit
+
+		childLogger.Debug().Interface("=========>>>>> transfer: ",transfer).Msg("<==========")
 
 		_, _, err := apiService.CallApi(ctx,
 												s.apiService[2].Url,
