@@ -37,7 +37,6 @@ func (s *WorkerService) AddCredit(ctx context.Context, credit *model.AccountStat
 
 	// Trace
 	span := tracerProvider.Span(ctx, "service.AddCredit")
-	defer span.End()
 	
 	// Get the database connection
 	tx, conn, err := s.workerRepository.DatabasePGServer.StartTx(ctx)
