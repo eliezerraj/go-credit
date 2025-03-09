@@ -6,6 +6,7 @@ import (
     "github.com/go-credit/internal/core/erro"
 )
 
+// About CB setup
 func CircuitBreakerConfig() *gobreaker.CircuitBreaker {
     settings := gobreaker.Settings{
                                         Name:    "server-circuit-breaker",

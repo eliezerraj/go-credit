@@ -28,6 +28,7 @@ func NewWorkerRepository(databasePGServer *go_core_pg.DatabasePGServer) *WorkerR
 	}
 }
 
+// About add credit
 func (w WorkerRepository) AddCredit(ctx context.Context, tx pgx.Tx, credit *model.AccountStatement) (*model.AccountStatement, error){
 	childLogger.Debug().Msg("AddCredit")
 
@@ -59,6 +60,7 @@ func (w WorkerRepository) AddCredit(ctx context.Context, tx pgx.Tx, credit *mode
 	return credit , nil
 }
 
+// About list credit
 func (w WorkerRepository) ListCredit(ctx context.Context, credit *model.AccountStatement) (*[]model.AccountStatement, error){
 	childLogger.Debug().Msg("ListCredit")
 	
@@ -113,6 +115,7 @@ func (w WorkerRepository) ListCredit(ctx context.Context, credit *model.AccountS
 	return &res_accountStatement_list , nil
 }
 
+// About list credit per date
 func (w WorkerRepository) ListCreditPerDate(ctx context.Context, credit *model.AccountStatement) (*[]model.AccountStatement, error){
 	childLogger.Debug().Msg("ListCreditPerDate")
 	
@@ -170,6 +173,7 @@ func (w WorkerRepository) ListCreditPerDate(ctx context.Context, credit *model.A
 	return &res_accountStatement_list , nil
 }
 
+// About create a uuid transaction
 func (w WorkerRepository) GetTransactionUUID(ctx context.Context) (*string, error){
 	childLogger.Debug().Msg("GetTransactionUUID")
 	

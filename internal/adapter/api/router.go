@@ -30,6 +30,7 @@ func NewHttpRouters(workerService *service.WorkerService) HttpRouters {
 	}
 }
 
+// About return a health
 func (h *HttpRouters) Health(rw http.ResponseWriter, req *http.Request) {
 	childLogger.Debug().Msg("Health")
 
@@ -37,6 +38,7 @@ func (h *HttpRouters) Health(rw http.ResponseWriter, req *http.Request) {
 	json.NewEncoder(rw).Encode(health)
 }
 
+// About return a live
 func (h *HttpRouters) Live(rw http.ResponseWriter, req *http.Request) {
 	childLogger.Debug().Msg("Live")
 
@@ -44,12 +46,14 @@ func (h *HttpRouters) Live(rw http.ResponseWriter, req *http.Request) {
 	json.NewEncoder(rw).Encode(live)
 }
 
+// About show all header received
 func (h *HttpRouters) Header(rw http.ResponseWriter, req *http.Request) {
 	childLogger.Debug().Msg("Header")
 	
 	json.NewEncoder(rw).Encode(req.Header)
 }
 
+// About add credit 
 func (h *HttpRouters) AddCredit(rw http.ResponseWriter, req *http.Request) error {
 	childLogger.Debug().Msg("AddCredit")
 
@@ -87,6 +91,7 @@ func (h *HttpRouters) AddCredit(rw http.ResponseWriter, req *http.Request) error
 	return core_json.WriteJSON(rw, http.StatusOK, res)
 }
 
+// About list all credit 
 func (h *HttpRouters) ListCredit(rw http.ResponseWriter, req *http.Request) error {
 	childLogger.Debug().Msg("ListCredit")
 
@@ -116,6 +121,7 @@ func (h *HttpRouters) ListCredit(rw http.ResponseWriter, req *http.Request) erro
 	return core_json.WriteJSON(rw, http.StatusOK, res)
 }
 
+// About list all credits per date
 func (h *HttpRouters) ListCreditPerDate(rw http.ResponseWriter, req *http.Request) error {
 	childLogger.Debug().Msg("ListCreditPerDate")
 

@@ -10,18 +10,13 @@ go-credit (post:add/fund) == (REST) ==> go-account (service.AddFundBalanceAccoun
 
 ## database
 
-        CREATE TABLE public.account_statement (
-            id serial4 NOT NULL,
-            fk_account_id int4 NULL,
-            type_charge varchar(200) NULL,
-            charged_at timestamptz NULL,
-            currency varchar(10) NULL,
-            amount float8 NULL,
-            tenant_id varchar(200) NULL,
-            CONSTRAINT account_statement_pkey PRIMARY KEY (id)
-        );
+See repo https://github.com/eliezerraj/go-account-migration-worker.git
 
 ## Endpoints
+
++ GET /header
+
++ GET /info
 
 + POST /add
 
@@ -33,13 +28,7 @@ go-credit (post:add/fund) == (REST) ==> go-account (service.AddFundBalanceAccoun
             "tenant_id": "TENANT-200"
         }
 
-+ GET /header
-
-+ GET /info
-
 + GET /list/ACC-1
-
-        curl svc01.domain.com/list/ACC-1 | jq
 
 + GET /listPerDate?account=ACC-1&date_start=2024-07-24
 

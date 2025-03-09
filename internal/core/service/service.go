@@ -13,6 +13,7 @@ type WorkerService struct {
 	apiService		[]model.ApiService
 }
 
+// About create a ner worker service
 func NewWorkerService(	workerRepository *database.WorkerRepository,
 						apiService		[]model.ApiService) *WorkerService{
 	childLogger.Debug().Msg("NewWorkerService")

@@ -31,6 +31,7 @@ func errorStatusCode(statusCode int) error{
 	return err
 }
 
+// About add credit
 func (s *WorkerService) AddCredit(ctx context.Context, credit *model.AccountStatement) (*model.AccountStatement, error){
 	childLogger.Debug().Msg("AddCredit")
 	childLogger.Debug().Interface("credit: ",credit).Msg("")
@@ -147,6 +148,7 @@ func (s *WorkerService) AddCredit(ctx context.Context, credit *model.AccountStat
 	return res, nil
 }
 
+// About list credit
 func (s *WorkerService) ListCredit(ctx context.Context, credit *model.AccountStatement) (*[]model.AccountStatement, error){
 	childLogger.Debug().Msg("ListCredit")
 	childLogger.Debug().Interface("credit: ",credit).Msg("")
@@ -185,6 +187,7 @@ func (s *WorkerService) ListCredit(ctx context.Context, credit *model.AccountSta
 	return res, nil
 }
 
+// About list credit per date
 func (s *WorkerService) ListCreditPerDate(ctx context.Context, credit *model.AccountStatement) (*[]model.AccountStatement, error){
 	childLogger.Debug().Msg("ListCreditPerDate")
 	childLogger.Debug().Interface("credit: ",credit).Msg("")

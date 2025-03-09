@@ -33,10 +33,12 @@ type HttpServer struct {
 	httpServer	*model.Server
 }
 
+// About create a new http server
 func NewHttpAppServer(httpServer *model.Server) HttpServer {
 	return HttpServer{httpServer: httpServer }
 }
 
+// About start http server
 func (h HttpServer) StartHttpAppServer(	ctx context.Context, 
 										httpRouters *api.HttpRouters,
 										appServer *model.AppServer) {
@@ -67,7 +69,7 @@ func (h HttpServer) StartHttpAppServer(	ctx context.Context,
 		childLogger.Info().Msg("stop done !!!")
 	}()
 
-	// routrer
+	// router
 	myRouter := mux.NewRouter().StrictSlash(true)
 	myRouter.Use(core_middleware.MiddleWareHandlerHeader)
 
@@ -103,6 +105,7 @@ func (h HttpServer) StartHttpAppServer(	ctx context.Context,
 	listCreditDate.HandleFunc("/listPerDate", core_middleware.MiddleWareErrorHandler(httpRouters.ListCreditPerDate))		
 	listCreditDate.Use(otelmux.Middleware("go-credit"))
 
+	// setup http server
 	srv := http.Server{
 		Addr:         ":" +  strconv.Itoa(h.httpServer.Port),      	
 		Handler:      myRouter,                	          
@@ -113,6 +116,7 @@ func (h HttpServer) StartHttpAppServer(	ctx context.Context,
 
 	childLogger.Info().Str("Service Port : ", strconv.Itoa(h.httpServer.Port)).Msg("Service Port")
 
+	// start http server
 	go func() {
 		err := srv.ListenAndServe()
 		if err != nil {
@@ -120,6 +124,7 @@ func (h HttpServer) StartHttpAppServer(	ctx context.Context,
 		}
 	}()
 
+	// handle sig TERM
 	ch := make(chan os.Signal, 1)
 	signal.Notify(ch, os.Interrupt, syscall.SIGTERM)
 	<-ch

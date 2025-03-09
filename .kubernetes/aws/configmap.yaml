@@ -32,9 +32,7 @@ data:
   NAME_SERVICE_03: "go-fund-transfer"
   URL_SERVICE_03: "https://vpce.global.dev.caradhras.io/pv/creditFundSchedule" # call inside the cluster
   METHOD_SERVICE_03: "POST"
-  X_APIGW_API_ID_SERVICE_03: "129t4y8eoj"
+  X_APIGW_API_ID_SERVICE_03: "unb2n5wala"
 
-  #SERVICE_URL_DOMAIN_CB: "https://go-fund-transfer.architecture.caradhras.io"
-  #X_APIGW_API_ID_CB: ""
   #SERVER_URL_DOMAIN: "http://svc-go-account.test-a.svc.cluster.local:5000"
   #SERVER_URL_DOMAIN: "https://go-account.architecture.caradhras.io"
