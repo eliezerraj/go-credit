@@ -16,6 +16,7 @@ import(
 var tracerProvider go_core_observ.TracerProvider
 var apiService go_core_api.ApiService
 
+// About handle/convert http status code
 func errorStatusCode(statusCode int) error{
 	var err error
 	switch statusCode {
