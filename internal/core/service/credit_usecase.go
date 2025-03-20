@@ -1,6 +1,7 @@
 package service
 
 import(
+	"fmt"
 	"context"
 	"net/http"
 	"encoding/json"
@@ -34,12 +35,13 @@ func errorStatusCode(statusCode int) error{
 
 // About add credit
 func (s *WorkerService) AddCredit(ctx context.Context, credit *model.AccountStatement) (*model.AccountStatement, error){
-	childLogger.Debug().Msg("AddCredit")
-	childLogger.Debug().Interface("credit: ",credit).Msg("")
+	childLogger.Info().Interface("trace-resquest-id", ctx.Value("trace-request-id")).Msg("AddCredit")
+	childLogger.Info().Interface("trace-resquest-id", ctx.Value("trace-request-id")).Interface("credit: ",credit).Msg("")
 
 	// Trace
 	span := tracerProvider.Span(ctx, "service.AddCredit")
-	
+	trace_id := fmt.Sprintf("%v",ctx.Value("trace-request-id"))
+
 	// Get the database connection
 	tx, conn, err := s.workerRepository.DatabasePGServer.StartTx(ctx)
 	if err != nil {
@@ -68,9 +70,9 @@ func (s *WorkerService) AddCredit(ctx context.Context, credit *model.AccountStat
 	if (err != nil) {
 		spanCB := tracerProvider.Span(ctx, "service.AddCredit-CIRCUIT-BREAKER")
 
-		childLogger.Debug().Msg("+++++++++++++++++++++++++++++++++++++++++++++++++")
-		childLogger.Error().Err(err).Msg(" ****** Circuit Breaker OPEN !!! ******")
-		childLogger.Debug().Msg("+++++++++++++++++++++++++++++++++++++++++++++++++")
+		childLogger.Info().Interface("trace-resquest-id", ctx.Value("trace-request-id")).Msg("+++++++++++++++++++++++++++++++++++++++++++++++++")
+		childLogger.Error().Err(err).Interface("trace-resquest-id", ctx.Value("trace-request-id")).Msg(" ****** Circuit Breaker OPEN !!! ******")
+		childLogger.Info().Interface("trace-resquest-id", ctx.Value("trace-request-id")).Msg("+++++++++++++++++++++++++++++++++++++++++++++++++")
 		
 		transfer := model.Transfer{}
 		transfer.Currency = credit.Currency
@@ -78,13 +80,14 @@ func (s *WorkerService) AddCredit(ctx context.Context, credit *model.AccountStat
 		transfer.Type = "CREDIT"
 		transfer.AccountFrom = credit
 
-		childLogger.Debug().Interface("=========>>>>> transfer: ",transfer).Msg("<==========")
+		childLogger.Info().Interface("trace-resquest-id", ctx.Value("trace-request-id")).Interface("=========>>>>> transfer: ",transfer).Msg("<==========")
 
 		_, _, err := apiService.CallApi(ctx,
 												s.apiService[2].Url,
 												s.apiService[2].Method,
 												&s.apiService[2].Header_x_apigw_api_id,
-												nil, 
+												nil,
+												&trace_id, 
 												transfer)
 		if err != nil {
 			return nil, err
@@ -108,7 +111,8 @@ func (s *WorkerService) AddCredit(ctx context.Context, credit *model.AccountStat
 														s.apiService[0].Url + "/" + credit.AccountID,
 														s.apiService[0].Method,
 														&s.apiService[0].Header_x_apigw_api_id,
-														nil, 
+														nil,
+														&trace_id, 
 														nil)
 	if err != nil {
 		return nil, errorStatusCode(statusCode)
@@ -116,7 +120,6 @@ func (s *WorkerService) AddCredit(ctx context.Context, credit *model.AccountStat
 
 	jsonString, err  := json.Marshal(res_payload)
 	if err != nil {
-		childLogger.Error().Err(err).Msg("error Marshal")
 		return nil, errors.New(err.Error())
     }
 	var account_parsed model.Account
@@ -143,7 +146,8 @@ func (s *WorkerService) AddCredit(ctx context.Context, credit *model.AccountStat
 											s.apiService[1].Url,
 											s.apiService[1].Method,
 											&s.apiService[1].Header_x_apigw_api_id,
-											nil, 
+											nil,
+											&trace_id,
 											credit)
 	if err != nil {
 		return nil, errorStatusCode(statusCode)
@@ -154,11 +158,12 @@ func (s *WorkerService) AddCredit(ctx context.Context, credit *model.AccountStat
 
 // About list credit
 func (s *WorkerService) ListCredit(ctx context.Context, credit *model.AccountStatement) (*[]model.AccountStatement, error){
-	childLogger.Debug().Msg("ListCredit")
-	childLogger.Debug().Interface("credit: ",credit).Msg("")
+	childLogger.Info().Interface("trace-resquest-id", ctx.Value("trace-request-id")).Msg("ListCredit")
+	childLogger.Info().Interface("trace-resquest-id", ctx.Value("trace-request-id")).Interface("credit: ",credit).Msg("")
 
 	// Trace
 	span := tracerProvider.Span(ctx, "service.ListCredit")
+	trace_id := fmt.Sprintf("%v",ctx.Value("trace-request-id"))
 	defer span.End()
 	
 	// Get the Account ID from Account-service
@@ -166,7 +171,8 @@ func (s *WorkerService) ListCredit(ctx context.Context, credit *model.AccountSta
 														s.apiService[0].Url + "/" + credit.AccountID,
 														s.apiService[0].Method,
 														&s.apiService[0].Header_x_apigw_api_id,
-														nil, 
+														nil,
+														&trace_id,
 														nil)
 	if err != nil {
 		return nil, errorStatusCode(statusCode)
@@ -174,7 +180,6 @@ func (s *WorkerService) ListCredit(ctx context.Context, credit *model.AccountSta
 
 	jsonString, err  := json.Marshal(res_payload)
 	if err != nil {
-		childLogger.Error().Err(err).Msg("error Marshal")
 		return nil, errors.New(err.Error())
     }
 	var account_parsed model.Account
@@ -193,11 +198,12 @@ func (s *WorkerService) ListCredit(ctx context.Context, credit *model.AccountSta
 
 // About list credit per date
 func (s *WorkerService) ListCreditPerDate(ctx context.Context, credit *model.AccountStatement) (*[]model.AccountStatement, error){
-	childLogger.Debug().Msg("ListCreditPerDate")
-	childLogger.Debug().Interface("credit: ",credit).Msg("")
+	childLogger.Info().Interface("trace-resquest-id", ctx.Value("trace-request-id")).Msg("ListCreditPerDate")
+	childLogger.Info().Interface("trace-resquest-id", ctx.Value("trace-request-id")).Interface("credit: ",credit).Msg("")
 
 	// Trace
 	span := tracerProvider.Span(ctx, "service.ListCreditPerDate")
+	trace_id := fmt.Sprintf("%v",ctx.Value("trace-request-id"))
 	defer span.End()
 	
 	// Get the Account ID from Account-service
@@ -205,7 +211,8 @@ func (s *WorkerService) ListCreditPerDate(ctx context.Context, credit *model.Acc
 														s.apiService[0].Url + "/" + credit.AccountID,
 														s.apiService[0].Method,
 														&s.apiService[0].Header_x_apigw_api_id,
-														nil, 
+														nil,
+														&trace_id,
 														nil)
 	if err != nil {
 		return nil, errorStatusCode(statusCode)
@@ -213,7 +220,6 @@ func (s *WorkerService) ListCreditPerDate(ctx context.Context, credit *model.Acc
 
 	jsonString, err  := json.Marshal(res_payload)
 	if err != nil {
-		childLogger.Error().Err(err).Msg("error Marshal")
 		return nil, errors.New(err.Error())
     }
 	var account_parsed model.Account

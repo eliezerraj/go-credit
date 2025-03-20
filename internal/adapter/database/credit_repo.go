@@ -21,7 +21,7 @@ type WorkerRepository struct {
 }
 
 func NewWorkerRepository(databasePGServer *go_core_pg.DatabasePGServer) *WorkerRepository{
-	childLogger.Debug().Msg("NewWorkerRepository")
+	childLogger.Info().Msg("NewWorkerRepository")
 
 	return &WorkerRepository{
 		DatabasePGServer: databasePGServer,
@@ -30,7 +30,7 @@ func NewWorkerRepository(databasePGServer *go_core_pg.DatabasePGServer) *WorkerR
 
 // About add credit
 func (w WorkerRepository) AddCredit(ctx context.Context, tx pgx.Tx, credit *model.AccountStatement) (*model.AccountStatement, error){
-	childLogger.Debug().Msg("AddCredit")
+	childLogger.Info().Interface("trace-resquest-id", ctx.Value("trace-request-id")).Msg("AddCredit")
 
 	//trace
 	span := tracerProvider.Span(ctx, "database.AddCredit")
@@ -62,7 +62,7 @@ func (w WorkerRepository) AddCredit(ctx context.Context, tx pgx.Tx, credit *mode
 
 // About list credit
 func (w WorkerRepository) ListCredit(ctx context.Context, credit *model.AccountStatement) (*[]model.AccountStatement, error){
-	childLogger.Debug().Msg("ListCredit")
+	childLogger.Info().Interface("trace-resquest-id", ctx.Value("trace-request-id")).Msg("ListCredit")
 	
 	// Trace
 	span := tracerProvider.Span(ctx, "database.ListCredit")
@@ -117,7 +117,7 @@ func (w WorkerRepository) ListCredit(ctx context.Context, credit *model.AccountS
 
 // About list credit per date
 func (w WorkerRepository) ListCreditPerDate(ctx context.Context, credit *model.AccountStatement) (*[]model.AccountStatement, error){
-	childLogger.Debug().Msg("ListCreditPerDate")
+	childLogger.Info().Interface("trace-resquest-id", ctx.Value("trace-request-id")).Msg("ListCreditPerDate")
 	
 	// Trace
 	span := tracerProvider.Span(ctx, "database.ListCreditPerDate")
@@ -175,7 +175,7 @@ func (w WorkerRepository) ListCreditPerDate(ctx context.Context, credit *model.A
 
 // About create a uuid transaction
 func (w WorkerRepository) GetTransactionUUID(ctx context.Context) (*string, error){
-	childLogger.Debug().Msg("GetTransactionUUID")
+	childLogger.Info().Interface("trace-resquest-id", ctx.Value("trace-request-id")).Msg("GetTransactionUUID")
 	
 	// Trace
 	span := tracerProvider.Span(ctx, "database.GetTransactionUUID")
