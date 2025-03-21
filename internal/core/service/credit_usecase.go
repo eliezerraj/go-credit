@@ -80,7 +80,7 @@ func (s *WorkerService) AddCredit(ctx context.Context, credit *model.AccountStat
 		transfer.Type = "CREDIT"
 		transfer.AccountFrom = credit
 
-		childLogger.Info().Interface("trace-resquest-id", ctx.Value("trace-request-id")).Interface("=========>>>>> transfer: ",transfer).Msg("<==========")
+		childLogger.Info().Interface("trace_id", trace_id).Interface("=========>>>>> transfer: ",transfer).Msg("<==========")
 
 		_, _, err := apiService.CallApi(ctx,
 												s.apiService[2].Url,
