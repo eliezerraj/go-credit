@@ -29,6 +29,8 @@ func init(){
 		Str("component", "go-credit").
 		Str("package", "main").
 		Str("func", "init").Send()
+		
+	zerolog.SetGlobalLevel(logLevel)
 
 	infoPod, server := configuration.GetInfoPod()
 	configOTEL 		:= configuration.GetOtelEnv()
