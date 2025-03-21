@@ -25,8 +25,10 @@ var(
 
 // About initialize the enviroment var
 func init(){
-	log.Info().Msg("init")
-	zerolog.SetGlobalLevel(logLevel)
+	log.Info().
+		Str("component", "go-credit").
+		Str("package", "main").
+		Str("func", "init").Send()
 
 	infoPod, server := configuration.GetInfoPod()
 	configOTEL 		:= configuration.GetOtelEnv()
@@ -42,12 +44,13 @@ func init(){
 
 // About main
 func main (){
-	log.Info().Msg("----------------------------------------------------")
-	log.Info().Msg("main")
-	log.Info().Msg("----------------------------------------------------")
-	log.Info().Interface("appServer :",appServer).Msg("")
-	log.Info().Msg("----------------------------------------------------")
-
+	log.Info().
+		Str("component", "go-credit").
+		Str("package", "main").
+		Str("func", "main").
+		Interface("appServer :",appServer).
+		Send()
+		
 	ctx, cancel := context.WithTimeout(	context.Background(), 
 										time.Duration( appServer.Server.ReadTimeout ) * time.Second)
 	defer cancel()

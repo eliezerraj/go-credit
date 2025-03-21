@@ -6,7 +6,7 @@ import(
 	"github.com/rs/zerolog/log"
 )
 
-var childLogger = log.With().Str("core", "service").Logger()
+var childLogger = log.With().Str("component","go-credit").Str("package","internal.core.service").Logger()
 
 type WorkerService struct {
 	workerRepository *database.WorkerRepository

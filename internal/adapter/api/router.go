@@ -13,7 +13,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-var childLogger = log.With().Str("adapter", "api.router").Logger()
+var childLogger = log.With().Str("component", "go-credit").Str("package", "internal.adapter.api").Logger()
 
 var core_json coreJson.CoreJson
 var core_apiError coreJson.APIError
@@ -32,31 +32,29 @@ func NewHttpRouters(workerService *service.WorkerService) HttpRouters {
 
 // About return a health
 func (h *HttpRouters) Health(rw http.ResponseWriter, req *http.Request) {
-	childLogger.Info().Interface("trace-resquest-id", req.Context().Value("trace-request-id")).Msg("Health")
-
+	childLogger.Info().Str("func","Health").Interface("trace-resquest-id", req.Context().Value("trace-request-id")).Send()
 	health := true
 	json.NewEncoder(rw).Encode(health)
 }
 
 // About return a live
 func (h *HttpRouters) Live(rw http.ResponseWriter, req *http.Request) {
-	childLogger.Info().Interface("trace-resquest-id", req.Context().Value("trace-request-id")).Msg("Live")
-
+	childLogger.Info().Str("func","Live").Interface("trace-resquest-id", req.Context().Value("trace-request-id")).Send()
 	live := true
 	json.NewEncoder(rw).Encode(live)
 }
 
 // About show all header received
 func (h *HttpRouters) Header(rw http.ResponseWriter, req *http.Request) {
-	childLogger.Info().Interface("trace-resquest-id", req.Context().Value("trace-request-id")).Msg("Header")
+	childLogger.Info().Str("func","Header").Interface("trace-resquest-id", req.Context().Value("trace-request-id")).Send()	
 	
 	json.NewEncoder(rw).Encode(req.Header)
 }
 
 // About add credit 
 func (h *HttpRouters) AddCredit(rw http.ResponseWriter, req *http.Request) error {
-	childLogger.Info().Interface("trace-resquest-id", req.Context().Value("trace-request-id")).Msg("AddCredit")
-
+	childLogger.Info().Str("func","AddCredit").Interface("trace-resquest-id", req.Context().Value("trace-request-id")).Send()
+	
 	//trace
 	span := tracerProvider.Span(req.Context(), "adapter.api.AddCredit")
 	defer span.End()
@@ -93,8 +91,7 @@ func (h *HttpRouters) AddCredit(rw http.ResponseWriter, req *http.Request) error
 
 // About list all credit 
 func (h *HttpRouters) ListCredit(rw http.ResponseWriter, req *http.Request) error {
-	childLogger.Info().Interface("trace-resquest-id", req.Context().Value("trace-request-id")).Msg("ListCredit")
-
+	childLogger.Info().Str("func","ListCredit").Interface("trace-resquest-id", req.Context().Value("trace-request-id")).Send()
 	// trace
 	span := tracerProvider.Span(req.Context(), "adapter.api.ListCredit")
 	defer span.End()
@@ -123,8 +120,7 @@ func (h *HttpRouters) ListCredit(rw http.ResponseWriter, req *http.Request) erro
 
 // About list all credits per date
 func (h *HttpRouters) ListCreditPerDate(rw http.ResponseWriter, req *http.Request) error {
-	childLogger.Info().Interface("trace-resquest-id", req.Context().Value("trace-request-id")).Msg("ListCreditPerDate")
-
+	childLogger.Info().Str("func","ListCreditPerDate").Interface("trace-resquest-id", req.Context().Value("trace-request-id")).Send()
 	//Trace
 	span := tracerProvider.Span(req.Context(), "adapter.api.ListCreditPerDate")
 	defer span.End()

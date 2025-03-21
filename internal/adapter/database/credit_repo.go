@@ -13,8 +13,9 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
+var childLogger = log.With().Str("component","go-credit").Str("package","internal.adapter.database").Logger()
+
 var tracerProvider go_core_observ.TracerProvider
-var childLogger = log.With().Str("adapter", "database").Logger()
 
 type WorkerRepository struct {
 	DatabasePGServer *go_core_pg.DatabasePGServer
@@ -30,7 +31,7 @@ func NewWorkerRepository(databasePGServer *go_core_pg.DatabasePGServer) *WorkerR
 
 // About add credit
 func (w WorkerRepository) AddCredit(ctx context.Context, tx pgx.Tx, credit *model.AccountStatement) (*model.AccountStatement, error){
-	childLogger.Info().Interface("trace-resquest-id", ctx.Value("trace-request-id")).Msg("AddCredit")
+	childLogger.Info().Str("func","AddCredit").Interface("trace-resquest-id", ctx.Value("trace-request-id")).Send()
 
 	//trace
 	span := tracerProvider.Span(ctx, "database.AddCredit")
@@ -62,7 +63,7 @@ func (w WorkerRepository) AddCredit(ctx context.Context, tx pgx.Tx, credit *mode
 
 // About list credit
 func (w WorkerRepository) ListCredit(ctx context.Context, credit *model.AccountStatement) (*[]model.AccountStatement, error){
-	childLogger.Info().Interface("trace-resquest-id", ctx.Value("trace-request-id")).Msg("ListCredit")
+	childLogger.Info().Str("func","ListCredit").Interface("trace-resquest-id", ctx.Value("trace-request-id")).Send()
 	
 	// Trace
 	span := tracerProvider.Span(ctx, "database.ListCredit")
@@ -117,8 +118,8 @@ func (w WorkerRepository) ListCredit(ctx context.Context, credit *model.AccountS
 
 // About list credit per date
 func (w WorkerRepository) ListCreditPerDate(ctx context.Context, credit *model.AccountStatement) (*[]model.AccountStatement, error){
-	childLogger.Info().Interface("trace-resquest-id", ctx.Value("trace-request-id")).Msg("ListCreditPerDate")
-	
+	childLogger.Info().Str("func","ListCreditPerDate").Interface("trace-resquest-id", ctx.Value("trace-request-id")).Send()
+
 	// Trace
 	span := tracerProvider.Span(ctx, "database.ListCreditPerDate")
 	defer span.End()
@@ -175,8 +176,8 @@ func (w WorkerRepository) ListCreditPerDate(ctx context.Context, credit *model.A
 
 // About create a uuid transaction
 func (w WorkerRepository) GetTransactionUUID(ctx context.Context) (*string, error){
-	childLogger.Info().Interface("trace-resquest-id", ctx.Value("trace-request-id")).Msg("GetTransactionUUID")
-	
+	childLogger.Info().Str("func","GetTransactionUUID").Interface("trace-resquest-id", ctx.Value("trace-request-id")).Send()
+		
 	// Trace
 	span := tracerProvider.Span(ctx, "database.GetTransactionUUID")
 	defer span.End()
