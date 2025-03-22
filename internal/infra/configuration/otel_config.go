@@ -13,7 +13,7 @@ func GetOtelEnv() go_core_observ.ConfigOTEL {
 
 	err := godotenv.Load(".env")
 	if err != nil {
-		childLogger.Info().Err(err).Msg("env file not found")
+		childLogger.Info().Err(err).Send()
 	}
 
 	var configOTEL	go_core_observ.ConfigOTEL

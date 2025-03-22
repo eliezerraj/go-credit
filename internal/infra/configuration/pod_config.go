@@ -22,7 +22,7 @@ func GetInfoPod() (	model.InfoPod, model.Server) {
 
 	err := godotenv.Load(".env")
 	if err != nil {
-		childLogger.Info().Err(err).Msg("env file not found !!!")
+		childLogger.Info().Err(err).Send()
 	}
 
 	var infoPod 	model.InfoPod

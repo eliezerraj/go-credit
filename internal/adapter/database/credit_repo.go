@@ -22,7 +22,7 @@ type WorkerRepository struct {
 }
 
 func NewWorkerRepository(databasePGServer *go_core_pg.DatabasePGServer) *WorkerRepository{
-	childLogger.Info().Msg("NewWorkerRepository")
+	childLogger.Info().Str("func","NewWorkerRepository").Send()
 
 	return &WorkerRepository{
 		DatabasePGServer: databasePGServer,

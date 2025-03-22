@@ -13,7 +13,7 @@ func GetDatabaseEnv() go_core_pg.DatabaseConfig {
 
 	err := godotenv.Load(".env")
 	if err != nil {
-		childLogger.Info().Err(err).Msg("env file not found !!!")
+		childLogger.Info().Err(err).Send()
 	}
 	
 	var databaseConfig	go_core_pg.DatabaseConfig

@@ -35,8 +35,7 @@ func errorStatusCode(statusCode int) error{
 
 // About add credit
 func (s *WorkerService) AddCredit(ctx context.Context, credit *model.AccountStatement) (*model.AccountStatement, error){
-	childLogger.Info().Interface("trace-resquest-id", ctx.Value("trace-request-id")).Msg("AddCredit")
-	childLogger.Info().Interface("trace-resquest-id", ctx.Value("trace-request-id")).Interface("credit: ",credit).Msg("")
+	childLogger.Info().Str("func","AddCredit").Interface("trace-resquest-id", ctx.Value("trace-request-id")).Interface("credit", credit).Send()
 
 	// Trace
 	span := tracerProvider.Span(ctx, "service.AddCredit")
@@ -70,10 +69,8 @@ func (s *WorkerService) AddCredit(ctx context.Context, credit *model.AccountStat
 	if (err != nil) {
 		spanCB := tracerProvider.Span(ctx, "service.AddCredit-CIRCUIT-BREAKER")
 
-		childLogger.Info().Interface("trace-resquest-id", ctx.Value("trace-request-id")).Msg("+++++++++++++++++++++++++++++++++++++++++++++++++")
 		childLogger.Error().Err(err).Interface("trace-resquest-id", ctx.Value("trace-request-id")).Msg(" ****** Circuit Breaker OPEN !!! ******")
-		childLogger.Info().Interface("trace-resquest-id", ctx.Value("trace-request-id")).Msg("+++++++++++++++++++++++++++++++++++++++++++++++++")
-		
+
 		transfer := model.Transfer{}
 		transfer.Currency = credit.Currency
 		transfer.Amount = credit.Amount
@@ -158,8 +155,7 @@ func (s *WorkerService) AddCredit(ctx context.Context, credit *model.AccountStat
 
 // About list credit
 func (s *WorkerService) ListCredit(ctx context.Context, credit *model.AccountStatement) (*[]model.AccountStatement, error){
-	childLogger.Info().Interface("trace-resquest-id", ctx.Value("trace-request-id")).Msg("ListCredit")
-	childLogger.Info().Interface("trace-resquest-id", ctx.Value("trace-request-id")).Interface("credit: ",credit).Msg("")
+	childLogger.Info().Str("func","ListCredit").Interface("trace-resquest-id", ctx.Value("trace-request-id")).Interface("credit", credit).Send()
 
 	// Trace
 	span := tracerProvider.Span(ctx, "service.ListCredit")
@@ -198,8 +194,7 @@ func (s *WorkerService) ListCredit(ctx context.Context, credit *model.AccountSta
 
 // About list credit per date
 func (s *WorkerService) ListCreditPerDate(ctx context.Context, credit *model.AccountStatement) (*[]model.AccountStatement, error){
-	childLogger.Info().Interface("trace-resquest-id", ctx.Value("trace-request-id")).Msg("ListCreditPerDate")
-	childLogger.Info().Interface("trace-resquest-id", ctx.Value("trace-request-id")).Interface("credit: ",credit).Msg("")
+	childLogger.Info().Str("func","ListCreditPerDate").Interface("trace-resquest-id", ctx.Value("trace-request-id")).Interface("credit", credit).Send()
 
 	// Trace
 	span := tracerProvider.Span(ctx, "service.ListCreditPerDate")

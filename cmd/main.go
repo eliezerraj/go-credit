@@ -21,14 +21,12 @@ var(
 	appServer	model.AppServer
 	databaseConfig go_core_pg.DatabaseConfig
 	databasePGServer go_core_pg.DatabasePGServer
+	childLogger = log.With().Str("component","go-credit").Str("package", "main").Logger()
 )
 
 // About initialize the enviroment var
 func init(){
-	log.Info().
-		Str("component", "go-credit").
-		Str("package", "main").
-		Str("func", "init").Send()
+	childLogger.Info().Str("func","init").Send()
 		
 	zerolog.SetGlobalLevel(logLevel)
 
@@ -46,13 +44,8 @@ func init(){
 
 // About main
 func main (){
-	log.Info().
-		Str("component", "go-credit").
-		Str("package", "main").
-		Str("func", "main").
-		Interface("appServer :",appServer).
-		Send()
-		
+	childLogger.Info().Str("func","main").Interface("appServer :",appServer).Send()
+
 	ctx, cancel := context.WithTimeout(	context.Background(), 
 										time.Duration( appServer.Server.ReadTimeout ) * time.Second)
 	defer cancel()
@@ -64,9 +57,9 @@ func main (){
 		databasePGServer, err = databasePGServer.NewDatabasePGServer(ctx, *appServer.DatabaseConfig)
 		if err != nil {
 			if count < 3 {
-				log.Error().Err(err).Msg("error open database... trying again !!")
+				childLogger.Error().Err(err).Msg("error open database... trying again !!")
 			} else {
-				log.Error().Err(err).Msg("fatal error open Database aborting")
+				childLogger.Error().Err(err).Msg("fatal error open Database aborting")
 				panic(err)
 			}
 			time.Sleep(3 * time.Second) //backoff

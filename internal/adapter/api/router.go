@@ -25,6 +25,8 @@ type HttpRouters struct {
 }
 
 func NewHttpRouters(workerService *service.WorkerService) HttpRouters {
+	childLogger.Info().Str("func","NewHttpRouters").Send()
+
 	return HttpRouters{
 		workerService: workerService,
 	}
@@ -33,6 +35,7 @@ func NewHttpRouters(workerService *service.WorkerService) HttpRouters {
 // About return a health
 func (h *HttpRouters) Health(rw http.ResponseWriter, req *http.Request) {
 	childLogger.Info().Str("func","Health").Interface("trace-resquest-id", req.Context().Value("trace-request-id")).Send()
+	
 	health := true
 	json.NewEncoder(rw).Encode(health)
 }
@@ -40,6 +43,7 @@ func (h *HttpRouters) Health(rw http.ResponseWriter, req *http.Request) {
 // About return a live
 func (h *HttpRouters) Live(rw http.ResponseWriter, req *http.Request) {
 	childLogger.Info().Str("func","Live").Interface("trace-resquest-id", req.Context().Value("trace-request-id")).Send()
+	
 	live := true
 	json.NewEncoder(rw).Encode(live)
 }
